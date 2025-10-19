@@ -13,7 +13,10 @@ function Survey() {
     annualIncome: '',
     employmentStatus: '',
     hasCreditCards: '',
-    creditCards: [] as string[]
+    creditCards: [] as string[],
+    creditLength: '',
+    latePayments: '',
+    creditGoal: ''
   });
   const [loading, setLoading] = useState(false);
   const [bankLoading, setBankLoading] = useState(false);
@@ -111,7 +114,7 @@ function Survey() {
     setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
-  const totalSteps = 5;
+  const totalSteps = 8;
   const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -137,7 +140,10 @@ function Survey() {
           annualIncome: annualIncomeLabel,
           employmentStatus: answers.employmentStatus,
           hasCreditCards: answers.hasCreditCards,
-          creditCards: answers.creditCards
+          creditCards: answers.creditCards,
+          creditLength: answers.creditLength,
+          latePayments: answers.latePayments,
+          creditGoal: answers.creditGoal
         });
       }
     } catch (err) {
@@ -154,13 +160,36 @@ function Survey() {
       case 3: return answers.annualIncome !== '';
       case 4: return answers.employmentStatus !== '';
       case 5: return answers.hasCreditCards !== '';
+      case 6: return answers.creditLength !== '';
+      case 7: return answers.latePayments !== '';
+      case 8: return answers.creditGoal !== '';
       default: return false;
     }
   };
 
+  const creditLengthOptions = [
+    { value: 'never', label: 'Never' },
+    { value: '<1', label: '< 1 Year' },
+    { value: '1-2', label: '1 - 2 Years' },
+    { value: '2-5', label: '2 - 5 Years' },
+    { value: '5-10', label: '5 - 10 Years' },
+    { value: '10+', label: '10+ Years' }
+  ];
+  const latePaymentsOptions = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' }
+  ];
+  const creditGoalOptions = [
+    { value: 'rewards', label: 'Rewards' },
+    { value: 'building', label: 'Building Credit' },
+    { value: 'travel', label: 'Travel' },
+    { value: 'transfer', label: 'Balance Transfer' }
+  ];
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        // ...existing code for bank linking...
         return (
           <div>
             <motion.h2 
@@ -206,6 +235,8 @@ function Survey() {
           </div>
         );
       case 2:
+        // ...existing code for credit score...
+        // ...existing code...
         return (
           <div>
             <motion.h2 
@@ -242,6 +273,345 @@ function Survey() {
                     className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
                       before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
                       checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 3:
+        // ...existing code for annual income...
+        // ...existing code...
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your annual income?
+            </motion.h2>
+            <div className="space-y-3">
+              {incomeOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.08,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.annualIncome === option.value 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="annualIncome"
+                    value={option.value}
+                    checked={answers.annualIncome === option.value}
+                    onChange={(e) => handleAnswer('annualIncome', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 4:
+        // ...existing code for employment status...
+        // ...existing code...
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your employment status?
+            </motion.h2>
+            <div className="space-y-3">
+              {employmentOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.employmentStatus === option.value 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="employmentStatus"
+                    value={option.value}
+                    checked={answers.employmentStatus === option.value}
+                    onChange={(e) => handleAnswer('employmentStatus', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 5:
+          return (
+            <div>
+              <motion.h2 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+              >
+                Do you currently have any credit cards?
+              </motion.h2>
+              <div className="space-y-3">
+                <motion.label
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: 0,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.hasCreditCards === 'yes' 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="hasCreditCards"
+                    value="yes"
+                    checked={answers.hasCreditCards === 'yes'}
+                    onChange={(e) => handleAnswer('hasCreditCards', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">Yes</span>
+                </motion.label>
+                <motion.label
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: 0.1,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.hasCreditCards === 'no' 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="hasCreditCards"
+                    value="no"
+                    checked={answers.hasCreditCards === 'no'}
+                    onChange={(e) => handleAnswer('hasCreditCards', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">No</span>
+                </motion.label>
+              </div>
+              {answers.hasCreditCards === 'yes' && (
+                <motion.div 
+                  ref={creditCardsRef}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="mt-6"
+                >
+                  <motion.h3 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                    className="text-lg font-semibold text-gray-900 mb-1 font-manrope"
+                  >
+                    Which credit cards do you have?
+                  </motion.h3>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+                    className="text-sm text-gray-500 mb-4"
+                  >
+                    Select one or more options
+                  </motion.p>
+                  <div className="space-y-2">
+                    {creditCardOptions.map((card, index) => (
+                      <motion.label 
+                        key={card}
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ 
+                          duration: 0.4, 
+                          delay: 0.2 + index * 0.05,
+                          ease: "easeOut"
+                        }}
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                          answers.creditCards.includes(card) 
+                            ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                            : 'border-2 border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          value={card}
+                          checked={answers.creditCards.includes(card)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const isNoneOfAbove = value === 'None of the above';
+                            setAnswers(prev => {
+                              if (e.target.checked) {
+                                if (isNoneOfAbove) {
+                                  return { ...prev, creditCards: [value] };
+                                }
+                                return {
+                                  ...prev,
+                                  creditCards: [...prev.creditCards.filter(c => c !== 'None of the above'), value]
+                                };
+                              } else {
+                                return {
+                                  ...prev,
+                                  creditCards: prev.creditCards.filter(c => c !== value)
+                                };
+                              }
+                            });
+                          }}
+                          className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                            before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                            checked:before:bg-[#D2A0F0]"
+                        />
+                        <span className="text-gray-900">{card}</span>
+                      </motion.label>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          );
+      case 6:
+        // New: How long have you had any line of credit?
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              How long have you had any line of credit (credit card, loan, etc.)?
+            </motion.h2>
+            <div className="space-y-3">
+              {creditLengthOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${answers.creditLength === option.value ? 'bg-purple-50 border-2 border-[#D2A0F0]' : 'border-2 border-gray-200 hover:border-gray-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="creditLength"
+                    value={option.value}
+                    checked={answers.creditLength === option.value}
+                    onChange={(e) => handleAnswer('creditLength', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200 checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 7:
+        // New: Have you missed or made any late payments in the last 12 months?
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              Have you missed or made any late payments in the last 12 months?
+            </motion.h2>
+            <div className="space-y-3">
+              {latePaymentsOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${answers.latePayments === option.value ? 'bg-purple-50 border-2 border-[#D2A0F0]' : 'border-2 border-gray-200 hover:border-gray-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="latePayments"
+                    value={option.value}
+                    checked={answers.latePayments === option.value}
+                    onChange={(e) => handleAnswer('latePayments', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200 checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 8:
+        // New: What's your main goal with a credit card?
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What's your main goal with a credit card?
+            </motion.h2>
+            <div className="space-y-3">
+              {creditGoalOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${answers.creditGoal === option.value ? 'bg-purple-50 border-2 border-[#D2A0F0]' : 'border-2 border-gray-200 hover:border-gray-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="creditGoal"
+                    value={option.value}
+                    checked={answers.creditGoal === option.value}
+                    onChange={(e) => handleAnswer('creditGoal', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200 checked:before:bg-[#D2A0F0]"
                   />
                   <span className="text-gray-900">{option.label}</span>
                 </motion.label>
