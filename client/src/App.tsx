@@ -177,6 +177,8 @@ function AppContent() {
                                         opacity: 1,
                                         scale: 1,
                                         rotate: 0,
+                                        x: [0, 20, 0, -20, 0],
+                                        y: [0, -15, 0, 15, 0],
                                     }}
                                     whileHover={{
                                         y: -10,
@@ -200,11 +202,17 @@ function AppContent() {
                                             type: "spring",
                                             stiffness: 300,
                                         },
+                                        x: {
+                                            duration: 8,
+                                            delay: 1,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        },
                                         y: {
-                                            duration: 2.5,
-                                            type: "spring",
-                                            stiffness: 40,
-                                            damping: 30,
+                                            duration: 8,
+                                            delay: 1,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
                                         },
                                     }}
                                 />
@@ -253,6 +261,8 @@ function AppContent() {
                                         opacity: 1,
                                         scale: 1,
                                         rotate: 0,
+                                        x: [0, -15, 0, 15, 0],
+                                        y: [0, 12, 0, -12, 0],
                                     }}
                                     whileHover={{
                                         y: -12,
@@ -271,15 +281,22 @@ function AppContent() {
                                             type: "spring",
                                             stiffness: 100,
                                         },
-                                        y: {
-                                            duration: 0.3,
-                                            type: "spring",
-                                            stiffness: 300,
-                                        },
                                         rotate: {
                                             duration: 0.3,
                                             type: "spring",
                                             stiffness: 300,
+                                        },
+                                        x: {
+                                            duration: 6,
+                                            delay: 1.2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        },
+                                        y: {
+                                            duration: 6,
+                                            delay: 1.2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
                                         },
                                     }}
                                 />
@@ -391,6 +408,8 @@ function AppContent() {
                                         opacity: 1,
                                         scale: 1,
                                         rotate: 0,
+                                        x: [0, 18, 0, -18, 0],
+                                        y: [0, -10, 0, 10, 0],
                                     }}
                                     whileHover={{
                                         y: -10,
@@ -414,11 +433,17 @@ function AppContent() {
                                             type: "spring",
                                             stiffness: 300,
                                         },
+                                        x: {
+                                            duration: 7,
+                                            delay: 1.5,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        },
                                         y: {
-                                            duration: 2.5,
-                                            type: "spring",
-                                            stiffness: 40,
-                                            damping: 30,
+                                            duration: 7,
+                                            delay: 1.5,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
                                         },
                                     }}
                                 />

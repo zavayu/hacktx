@@ -132,7 +132,7 @@ export default function CardRecommendations() {
             tenderfoot: {
                 color: "bg-green-100 text-green-800",
                 icon: "🌱",
-                title: "Tenderfoot",
+                title: "It's a Match!",
                 description: "Building your credit foundation",
             },
             journeyman: {
@@ -222,7 +222,7 @@ export default function CardRecommendations() {
                         <>
                             {/* Wavy Path SVG */}
                             <svg
-                                className="absolute top-1/2 left-0 w-full h-64 transform -translate-y-1/2 pointer-events-none z-0"
+                                className="absolute left-1 top-1/2 w-[75vw] h-64 transform -translate-y-1/2 pointer-events-none z-0"
                                 viewBox="0 0 2400 200"
                                 preserveAspectRatio="none"
                             >
@@ -232,11 +232,11 @@ export default function CardRecommendations() {
                                     strokeWidth="4"
                                     fill="none"
                                     strokeLinecap="round"
-                                                    initial={{ pathLength: 0 }}
-                                                    animate={{ pathLength: 1 }}
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
                                     transition={{ duration: 2, ease: "easeInOut" }}
                                 />
-                                            </svg>
+                            </svg>
 
                             {/* Cards along the wavy path */}
                             <div className="relative flex items-center justify-start gap-8 min-w-max pl-8 pr-24 z-10">

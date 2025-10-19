@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { Turnstile } from "@marsidev/react-turnstile";
+import CreditCardAPI from "credit-card-db-api";
 
 function Survey() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -29,6 +30,18 @@ function Survey() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const creditCardsRef = useRef<HTMLDivElement>(null);
+
+    // Fetch credit card options from the database API
+    const [creditCardOptions, setCreditCardOptions] = useState<string[]>([]);
+    useEffect(() => {
+        const api = new CreditCardAPI();
+        const allCards = api.getAll();
+        // Use card names for options, add "None of the above" at the end
+        setCreditCardOptions([
+            ...allCards.map((card: any) => card.name),
+            "None of the above",
+        ]);
+    }, []);
 
     // Auto-scroll when "Yes" is selected for credit cards
     useEffect(() => {
@@ -194,16 +207,6 @@ function Survey() {
         { value: "student", label: "Full time student" },
     ];
 
-    const creditCardOptions = [
-        "Chase Sapphire Preferred",
-        "Capital One Venture",
-        "American Express Gold",
-        "Discover It Cash Back",
-        "Citi Double Cash",
-        "Wells Fargo Active Cash",
-        "Bank of America Cash Rewards",
-        "None of the above",
-    ];
 
     const handleAnswer = (question: string, value: string) => {
         setAnswers((prev) => ({ ...prev, [question]: value }));
@@ -686,79 +689,44 @@ function Survey() {
                                 >
                                     Select one or more options
                                 </motion.p>
-                                <div className="space-y-2">
-                                    {creditCardOptions.map((card, index) => (
-                                        <motion.label
-                                            key={card}
-                                            initial={{ opacity: 0, x: -30 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{
-                                                duration: 0.4,
-                                                delay: 0.2 + index * 0.05,
-                                                ease: "easeOut",
-                                            }}
-                                            className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
-                                                answers.creditCards.includes(
-                                                    card
-                                                )
-                                                    ? "bg-purple-50 border-2 border-[#D2A0F0]"
-                                                    : "border-2 border-gray-200 hover:border-gray-300"
-                                            }`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                value={card}
-                                                checked={answers.creditCards.includes(
-                                                    card
-                                                )}
-                                                onChange={(e) => {
-                                                    const value =
-                                                        e.target.value;
-                                                    const isNoneOfAbove =
-                                                        value ===
-                                                        "None of the above";
-                                                    setAnswers((prev) => {
-                                                        if (e.target.checked) {
-                                                            if (isNoneOfAbove) {
-                                                                return {
-                                                                    ...prev,
-                                                                    creditCards:
-                                                                        [value],
-                                                                };
+                                <div className="mt-2">
+                                    <div className="border-2 border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto bg-white">
+                                        <div className="space-y-2">
+                                            {creditCardOptions.map((card) => (
+                                                <label
+                                                    key={card}
+                                                    className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={answers.creditCards.includes(card)}
+                                                        onChange={(e) => {
+                                                            const isChecked = e.target.checked;
+                                                            if (card === "None of the above") {
+                                                                if (isChecked) {
+                                                                    setAnswers((prev) => ({ ...prev, creditCards: ["None of the above"] }));
+                                                                } else {
+                                                                    setAnswers((prev) => ({ ...prev, creditCards: [] }));
+                                                                }
+                                                            } else {
+                                                                setAnswers((prev) => {
+                                                                    const filtered = prev.creditCards.filter(c => c !== "None of the above");
+                                                                    if (isChecked) {
+                                                                        return { ...prev, creditCards: [...filtered, card] };
+                                                                    } else {
+                                                                        return { ...prev, creditCards: filtered.filter(c => c !== card) };
+                                                                    }
+                                                                });
                                                             }
-                                                            return {
-                                                                ...prev,
-                                                                creditCards: [
-                                                                    ...prev.creditCards.filter(
-                                                                        (c) =>
-                                                                            c !==
-                                                                            "None of the above"
-                                                                    ),
-                                                                    value,
-                                                                ],
-                                                            };
-                                                        } else {
-                                                            return {
-                                                                ...prev,
-                                                                creditCards:
-                                                                    prev.creditCards.filter(
-                                                                        (c) =>
-                                                                            c !==
-                                                                            value
-                                                                    ),
-                                                            };
-                                                        }
-                                                    });
-                                                }}
-                                                className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
-                            before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
-                            checked:before:bg-[#D2A0F0]"
-                                            />
-                                            <span className="text-gray-900">
-                                                {card}
-                                            </span>
-                                        </motion.label>
-                                    ))}
+                                                        }}
+                                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 accent-purple-600"
+                                                    />
+                                                    <span className="ml-3 text-gray-700">{card}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2">Select all cards that apply.</p>
                                 </div>
                             </motion.div>
                         )}
