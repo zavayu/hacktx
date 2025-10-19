@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Survey from "./pages/Survey";
+import Roadmap from "./pages/Roadmap";
 import TestCards from "./pages/TestCards";
 import { ArrowRightIcon, PlayIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
@@ -32,6 +33,14 @@ function AppContent() {
                         element={
                             <ProtectedRoute>
                                 <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/roadmap"
+                        element={
+                            <ProtectedRoute>
+                                <Roadmap />
                             </ProtectedRoute>
                         }
                     />

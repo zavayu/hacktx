@@ -1,0 +1,92 @@
+[
+  {
+    "id": "starter_card",
+    "title": "Get a Starter Credit Card",
+    "description": "Apply for your first credit card to start building your credit history. Look for cards with low fees or secured options if you're new to credit.",
+    "tags": ["beginner", "credit_start", "secured"],
+    "difficulty": "easy",
+    "requirements": [],
+    "reward_xp": 100
+  },
+  {
+    "id": "build_700_score",
+    "title": "Build a 700+ Credit Score",
+    "description": "Make on-time payments and keep your credit utilization below 30%. Over time, these habits will help you reach a good credit score.",
+    "tags": ["credit_score", "growth"],
+    "difficulty": "medium",
+    "requirements": ["starter_card"],
+    "reward_xp": 200
+  },
+  {
+    "id": "add_second_card",
+    "title": "Add a Second Credit Card",
+    "description": "Increase your available credit and diversify your credit mix by responsibly adding another card with complementary rewards.",
+    "tags": ["credit_mix", "intermediate"],
+    "difficulty": "medium",
+    "requirements": ["starter_card"],
+    "reward_xp": 150
+  },
+  {
+    "id": "maximize_cashback",
+    "title": "Maximize Cashback Rewards",
+    "description": "Use cards strategically by matching spending categories to the highest reward rates. Redeem rewards monthly to stay consistent.",
+    "tags": ["rewards", "cashback"],
+    "difficulty": "medium",
+    "requirements": ["add_second_card"],
+    "reward_xp": 200
+  },
+  {
+    "id": "earn_travel_points",
+    "title": "Earn Travel Points and Miles",
+    "description": "Apply for a beginner travel card to start earning points toward flights and hotels. Focus on cards with flexible redemption options.",
+    "tags": ["travel", "rewards"],
+    "difficulty": "medium",
+    "requirements": ["build_700_score"],
+    "reward_xp": 200
+  },
+  {
+    "id": "lower_utilization",
+    "title": "Lower Credit Utilization",
+    "description": "Keep your credit usage under 30% across all cards. Paying mid-cycle or requesting credit limit increases can help lower utilization.",
+    "tags": ["credit_score", "habits"],
+    "difficulty": "medium",
+    "requirements": [],
+    "reward_xp": 150
+  },
+  {
+    "id": "upgrade_card",
+    "title": "Upgrade to a Premium Credit Card",
+    "description": "Once your score is 720+, explore upgrading to cards with premium perks like lounge access, travel insurance, and higher rewards rates.",
+    "tags": ["advanced", "premium", "travel"],
+    "difficulty": "hard",
+    "requirements": ["earn_travel_points", "build_700_score"],
+    "reward_xp": 300
+  },
+  {
+    "id": "pay_off_balance",
+    "title": "Pay Off Balances in Full",
+    "description": "Avoid paying interest by paying your statement balance in full each month. This builds trust with issuers and keeps your score strong.",
+    "tags": ["credit_health", "payments"],
+    "difficulty": "easy",
+    "requirements": ["starter_card"],
+    "reward_xp": 120
+  },
+  {
+    "id": "monitor_credit_report",
+    "title": "Monitor Your Credit Report",
+    "description": "Regularly review your credit report for accuracy and fraudulent activity. Use free annual reports or apps that offer ongoing monitoring.",
+    "tags": ["awareness", "security"],
+    "difficulty": "easy",
+    "requirements": [],
+    "reward_xp": 100
+  },
+  {
+    "id": "perfect_utilization",
+    "title": "Maintain Perfect Utilization",
+    "description": "Achieve elite status by keeping your utilization under 10% across all cards for 3 consecutive months — consistency is key!",
+    "tags": ["advanced", "discipline"],
+    "difficulty": "hard",
+    "requirements": ["lower_utilization"],
+    "reward_xp": 250
+  }
+]
