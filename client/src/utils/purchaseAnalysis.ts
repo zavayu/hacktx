@@ -39,6 +39,25 @@ export interface SpendingProfile {
  * Parse purchases array into category analysis
  */
 export function analyzePurchases(purchases: Purchase[]): SpendingProfile {
+  // Safety check for undefined or null purchases
+  if (!purchases || !Array.isArray(purchases)) {
+    return {
+      totalSpent: 0,
+      categories: [],
+      topCategory: { category: '', totalAmount: 0, transactionCount: 0, averageAmount: 0, percentage: 0 },
+      spendingPattern: {
+        restaurants: 0,
+        travel: 0,
+        groceries: 0,
+        gas: 0,
+        onlineShopping: 0,
+        streamingServices: 0,
+        hotel: 0,
+        airportLounge: 0,
+      }
+    };
+  }
+
   // Group purchases by category
   const categoryMap = new Map<string, Purchase[]>();
   
@@ -79,7 +98,7 @@ export function analyzePurchases(purchases: Purchase[]): SpendingProfile {
   return {
     totalSpent,
     categories,
-    topCategory: categories[0],
+    topCategory: categories[0] || { category: '', totalAmount: 0, transactionCount: 0, averageAmount: 0, percentage: 0 },
     spendingPattern
   };
 }
@@ -89,6 +108,11 @@ export function analyzePurchases(purchases: Purchase[]): SpendingProfile {
  */
 export function getSpendingInsights(profile: SpendingProfile): string[] {
   const insights: string[] = [];
+  
+  // Safety check for empty profile
+  if (!profile || !profile.topCategory || !profile.spendingPattern) {
+    return ["No spending data available. Complete the survey to see personalized insights!"];
+  }
   
   if (profile.topCategory.category === 'restaurants') {
     insights.push("You're a food enthusiast! Consider dining rewards cards.");

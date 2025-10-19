@@ -1,14 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { analyzePurchases, formatCurrency, formatPercentage, getSpendingInsights } from '../utils/purchaseAnalysis';
-import type { SpendingProfile, Purchase } from '../utils/purchaseAnalysis';
+import type { Purchase } from '../utils/purchaseAnalysis';
 
 interface DashboardProps {
-  purchases: Purchase[];
-  customerName: string;
+  purchases?: Purchase[];
+  customerName?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ purchases, customerName }) => {
+const Dashboard: React.FC<DashboardProps> = ({ purchases = [], customerName = "Customer" }) => {
   const profile = analyzePurchases(purchases);
   const insights = getSpendingInsights(profile);
 
@@ -189,7 +189,7 @@ const Dashboard: React.FC<DashboardProps> = ({ purchases, customerName }) => {
             <p className="text-gray-600 mb-6">What matters most to you</p>
             
             <div className="space-y-4">
-              {profile.categories.slice(0, 5).map((category, index) => (
+              {profile.categories.slice(0, 5).map((category, _) => (
                 <div key={category.category} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {category.category.replace('-', ' ')}

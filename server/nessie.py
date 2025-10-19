@@ -10,7 +10,6 @@ import os
 app = FastAPI(title="Nessie Customer Proxy")
 
 BASE_URL = "http://api.nessieisreal.com"
-API_KEY = VITE_NESSIE_API_KEY
 API_KEY = os.getenv("VITE_NESSIE_API_KEY")
 
 f = Faker()
