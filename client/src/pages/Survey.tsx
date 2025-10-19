@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
 function Survey() {
@@ -12,6 +15,7 @@ function Survey() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const creditScoreOptions = [
     { value: 'excellent', label: 'Excellent (720-850)' },
@@ -65,12 +69,20 @@ function Survey() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    // Here you would typically save the survey data to your backend
-    console.log('Survey answers:', answers);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    try {
+      if (currentUser) {
+        // Update Firestore user document with each answer as a top-level field
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          creditScore: answers.creditScore,
+          annualIncome: answers.annualIncome,
+          employmentStatus: answers.employmentStatus,
+          hasCreditCards: answers.hasCreditCards,
+          creditCards: answers.creditCards
+        });
+      }
+    } catch (err) {
+      console.error('Error saving survey:', err);
+    }
     setLoading(false);
     navigate('/dashboard');
   };
