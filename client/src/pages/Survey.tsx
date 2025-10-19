@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import {
-    Select,
-    SelectTrigger,
-    SelectContent,
-    SelectItem,
-    SelectValue,
-} from "../components/ui/select";
-import CreditCardAPI from "credit-card-db-api";
 import { useAuth } from "../contexts/AuthContext";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import Confetti from "react-confetti";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 function Survey() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -29,6 +23,9 @@ function Survey() {
     });
     const [loading, setLoading] = useState(false);
     const [bankLoading, setBankLoading] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
+    const [showTurnstile, setShowTurnstile] = useState(false);
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const creditCardsRef = useRef<HTMLDivElement>(null);
@@ -46,7 +43,42 @@ function Survey() {
     }, [answers.hasCreditCards]);
 
     const handleLinkBank = async () => {
+        if (!isVerified) {
+            setShowTurnstile(true);
+            return;
+        }
+
         setBankLoading(true);
+        setShowConfetti(true);
+        window.open('https://verified.capitalone.com/auth/signin', '_blank');
+        
+        await generateAndSaveBankData();
+        setTimeout(() => {
+            setShowConfetti(false);
+        }, 10000);
+    };
+
+    const handleTurnstileSuccess = (token: string) => {
+        console.log("Turnstile verification successful:", token);
+        setIsVerified(true);
+        setShowTurnstile(false);
+        setBankLoading(true);
+        setShowConfetti(true);
+        
+        window.open('https://verified.capitalone.com/auth/signin', '_blank');
+        generateAndSaveBankData();
+        
+        setTimeout(() => {
+            setShowConfetti(false);
+        }, 10000);
+    };
+
+    const handleTurnstileError = () => {
+        console.error("Turnstile verification failed");
+        setIsVerified(false);
+    };
+
+    const generateAndSaveBankData = async () => {
         try {
             // Generate fake customer and purchase data locally (no backend calls)
             const categories = [
@@ -131,7 +163,6 @@ function Survey() {
             setAnswers((prev) => ({ ...prev, bankLinked: true }));
         } catch (error) {
             console.error("❌ Error linking bank account:", error);
-            // You might want to show an error message to the user here
         } finally {
             await new Promise((resolve) => setTimeout(resolve, 1000));
             setAnswers((prev) => ({ ...prev, bankLinked: true }));
@@ -163,17 +194,16 @@ function Survey() {
         { value: "student", label: "Full time student" },
     ];
 
-    // Fetch credit card options from the database API
-    const [creditCardOptions, setCreditCardOptions] = useState<string[]>([]);
-    useEffect(() => {
-        const api = new CreditCardAPI();
-        const allCards = api.getAll();
-        // Use card names for options, add "None of the above" at the end
-        setCreditCardOptions([
-            ...allCards.map((card: any) => card.name),
-            "None of the above",
-        ]);
-    }, []);
+    const creditCardOptions = [
+        "Chase Sapphire Preferred",
+        "Capital One Venture",
+        "American Express Gold",
+        "Discover It Cash Back",
+        "Citi Double Cash",
+        "Wells Fargo Active Cash",
+        "Bank of America Cash Rewards",
+        "None of the above",
+    ];
 
     const handleAnswer = (question: string, value: string) => {
         setAnswers((prev) => ({ ...prev, [question]: value }));
@@ -347,11 +377,38 @@ function Survey() {
                                     </span>
                                 ) : answers.bankLinked ? (
                                     "Bank Account Linked"
+                                ) : showTurnstile ? (
+                                    "Verifying..."
                                 ) : (
                                     "Link Bank Account"
                                 )}
                             </button>
                         </motion.div>
+                        
+                        {/* Cloudflare Turnstile Verification */}
+                        {showTurnstile && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                            >
+                                <p className="text-sm text-gray-600 mb-4 text-center">
+                                    Please verify you are human to continue
+                                </p>
+                                <div className="flex justify-center">
+                                    <Turnstile
+                                        siteKey={import.meta.env.VITE_CF_SITE_KEY}
+                                        options={{
+                                            theme: 'light'
+                                        }}
+                                        onSuccess={handleTurnstileSuccess}
+                                        onError={handleTurnstileError}
+                                        onExpire={() => setIsVerified(false)}
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
                 );
             case 2:
@@ -629,44 +686,79 @@ function Survey() {
                                 >
                                     Select one or more options
                                 </motion.p>
-                                <div className="mt-2">
-                                    <div className="border-2 border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto bg-white">
-                                        <div className="space-y-2">
-                                            {creditCardOptions.map((card) => (
-                                                <label
-                                                    key={card}
-                                                    className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={answers.creditCards.includes(card)}
-                                                        onChange={(e) => {
-                                                            const isChecked = e.target.checked;
-                                                            if (card === "None of the above") {
-                                                                if (isChecked) {
-                                                                    setAnswers((prev) => ({ ...prev, creditCards: ["None of the above"] }));
-                                                                } else {
-                                                                    setAnswers((prev) => ({ ...prev, creditCards: [] }));
-                                                                }
-                                                            } else {
-                                                                setAnswers((prev) => {
-                                                                    const filtered = prev.creditCards.filter(c => c !== "None of the above");
-                                                                    if (isChecked) {
-                                                                        return { ...prev, creditCards: [...filtered, card] };
-                                                                    } else {
-                                                                        return { ...prev, creditCards: filtered.filter(c => c !== card) };
-                                                                    }
-                                                                });
+                                <div className="space-y-2">
+                                    {creditCardOptions.map((card, index) => (
+                                        <motion.label
+                                            key={card}
+                                            initial={{ opacity: 0, x: -30 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{
+                                                duration: 0.4,
+                                                delay: 0.2 + index * 0.05,
+                                                ease: "easeOut",
+                                            }}
+                                            className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                                                answers.creditCards.includes(
+                                                    card
+                                                )
+                                                    ? "bg-purple-50 border-2 border-[#D2A0F0]"
+                                                    : "border-2 border-gray-200 hover:border-gray-300"
+                                            }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                value={card}
+                                                checked={answers.creditCards.includes(
+                                                    card
+                                                )}
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+                                                    const isNoneOfAbove =
+                                                        value ===
+                                                        "None of the above";
+                                                    setAnswers((prev) => {
+                                                        if (e.target.checked) {
+                                                            if (isNoneOfAbove) {
+                                                                return {
+                                                                    ...prev,
+                                                                    creditCards:
+                                                                        [value],
+                                                                };
                                                             }
-                                                        }}
-                                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                                                    />
-                                                    <span className="ml-3 text-gray-700">{card}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-2">Select all cards that apply.</p>
+                                                            return {
+                                                                ...prev,
+                                                                creditCards: [
+                                                                    ...prev.creditCards.filter(
+                                                                        (c) =>
+                                                                            c !==
+                                                                            "None of the above"
+                                                                    ),
+                                                                    value,
+                                                                ],
+                                                            };
+                                                        } else {
+                                                            return {
+                                                                ...prev,
+                                                                creditCards:
+                                                                    prev.creditCards.filter(
+                                                                        (c) =>
+                                                                            c !==
+                                                                            value
+                                                                    ),
+                                                            };
+                                                        }
+                                                    });
+                                                }}
+                                                className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                            before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                            checked:before:bg-[#D2A0F0]"
+                                            />
+                                            <span className="text-gray-900">
+                                                {card}
+                                            </span>
+                                        </motion.label>
+                                    ))}
                                 </div>
                             </motion.div>
                         )}
@@ -902,6 +994,15 @@ function Survey() {
 
     return (
         <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+            {showConfetti && (
+                <Confetti
+                    width={window.innerWidth}
+                    height={window.innerHeight}
+                    recycle={false}
+                    numberOfPieces={200}
+                    gravity={0.3}
+                />
+            )}
             <div className="max-w-2xl w-full mx-auto">
                 <div className="bg-white p-8 rounded-2xl border border-gray-100">
                     {/* Progress Bar */}
