@@ -88,5 +88,95 @@
     "difficulty": "hard",
     "requirements": ["lower_utilization"],
     "reward_xp": 250
+  },
+  {
+    "id": "increase_credit_limit",
+    "title": "Request a Credit Limit Increase",
+    "description": "After 6-12 months of responsible card use, request a credit limit increase. This improves your utilization ratio without changing your spending habits.",
+    "tags": ["credit_score", "growth", "intermediate"],
+    "difficulty": "easy",
+    "requirements": ["starter_card"],
+    "reward_xp": 100
+  },
+  {
+    "id": "diversify_credit_mix",
+    "title": "Diversify Your Credit Mix",
+    "description": "Add different types of credit to your profile, such as a personal loan or retail store card. A diverse credit mix can boost your score by up to 10%.",
+    "tags": ["credit_mix", "intermediate", "growth"],
+    "difficulty": "medium",
+    "requirements": ["add_second_card"],
+    "reward_xp": 180
+  },
+  {
+    "id": "build_payment_history",
+    "title": "Build 12 Months of Perfect Payment History",
+    "description": "Make on-time payments for 12 consecutive months across all credit accounts. Payment history is the most important factor in your credit score.",
+    "tags": ["credit_health", "payments", "discipline"],
+    "difficulty": "medium",
+    "requirements": ["pay_off_balance"],
+    "reward_xp": 200
+  },
+  {
+    "id": "become_authorized_user",
+    "title": "Become an Authorized User",
+    "description": "Ask a family member or trusted friend with excellent credit to add you as an authorized user. Their positive payment history can help boost your score.",
+    "tags": ["beginner", "credit_start", "growth"],
+    "difficulty": "easy",
+    "requirements": [],
+    "reward_xp": 120
+  },
+  {
+    "id": "dispute_credit_errors",
+    "title": "Dispute Credit Report Errors",
+    "description": "Review your credit report and dispute any inaccuracies with the credit bureaus. Removing errors can instantly improve your credit score.",
+    "tags": ["awareness", "security", "credit_score"],
+    "difficulty": "medium",
+    "requirements": ["monitor_credit_report"],
+    "reward_xp": 150
+  },
+  {
+    "id": "set_autopay",
+    "title": "Set Up Automatic Payments",
+    "description": "Never miss a payment by setting up autopay for at least the minimum amount due. This protects your payment history and eliminates late fees.",
+    "tags": ["credit_health", "payments", "beginner"],
+    "difficulty": "easy",
+    "requirements": ["starter_card"],
+    "reward_xp": 80
+  },
+  {
+    "id": "build_emergency_fund",
+    "title": "Build a $1000 Emergency Fund",
+    "description": "Save $1000 to avoid relying on credit cards for emergencies. This prevents high balances and keeps your utilization low during unexpected events.",
+    "tags": ["financial_health", "savings", "intermediate"],
+    "difficulty": "medium",
+    "requirements": ["pay_off_balance"],
+    "reward_xp": 180
+  },
+  {
+    "id": "avoid_hard_inquiries",
+    "title": "Avoid Unnecessary Hard Inquiries",
+    "description": "Limit credit applications to essential needs only. Multiple hard inquiries within a short period can temporarily lower your credit score.",
+    "tags": ["credit_score", "awareness", "intermediate"],
+    "difficulty": "easy",
+    "requirements": ["monitor_credit_report"],
+    "reward_xp": 100
+  },
+  {
+    "id": "age_accounts",
+    "title": "Age Your Oldest Account to 2+ Years",
+    "description": "Keep your oldest credit account open and active for at least 2 years. Length of credit history accounts for 15% of your credit score.",
+    "tags": ["credit_score", "discipline", "growth"],
+    "difficulty": "hard",
+    "requirements": ["build_payment_history"],
+    "reward_xp": 250
+  },
+  {
+    "id": "reach_800_score",
+    "title": "Achieve an 800+ Credit Score",
+    "description": "Reach the elite 800+ credit score tier by maintaining excellent payment history, low utilization, diverse credit mix, and aged accounts.",
+    "tags": ["advanced", "credit_score", "elite"],
+    "difficulty": "hard",
+    "requirements": ["perfect_utilization", "build_payment_history", "age_accounts"],
+    "reward_xp": 500
   }
 ]
