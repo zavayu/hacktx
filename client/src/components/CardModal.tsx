@@ -484,7 +484,14 @@ export default function CardModal({
                                     {/* View Roadmap Button */}
                                     <Link
                                         to="/roadmap"
-                                        onClick={onClose}
+                                        state={{ selectedCard: card }}
+                                        onClick={() => {
+                                            // Store selected card in localStorage for roadmap
+                                            if (card) {
+                                                localStorage.setItem('selectedCardForRoadmap', JSON.stringify(card));
+                                            }
+                                            onClose();
+                                        }}
                                         className="flex items-center justify-center gap-2 w-full text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
                                         style={{ backgroundColor: '#D2A0F0' }}
                                     >

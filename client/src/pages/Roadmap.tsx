@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import {
     generatePersonalizedRoadmap,
     type Milestone,
@@ -14,15 +15,30 @@ import {
     TrophyIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/solid";
+import type { CreditCard } from "../utils/creditCardMatcher";
 
 const Roadmap = () => {
     const { currentUser } = useAuth();
+    const location = useLocation();
     const [userData, setUserData] = useState<UserData | null>(null);
     const [roadmap, setRoadmap] = useState<Milestone[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
-    const [completedMilestones, setCompletedMilestones] = useState<Set<string>>(new Set());
+    const [selectedCard, setSelectedCard] = useState<CreditCard | null>(null);
+    const [completedMilestones, setCompletedMilestones] = useState<Set<string>>(() => {
+        // Initialize from local storage
+        if (!currentUser) return new Set();
+        try {
+            const cached = localStorage.getItem(`completedMilestones_${currentUser.uid}`);
+            if (cached) {
+                return new Set(JSON.parse(cached));
+            }
+        } catch (error) {
+            console.error('Error loading completed milestones from cache:', error);
+        }
+        return new Set();
+    });
     const [celebratingMilestone, setCelebratingMilestone] = useState<string | null>(null);
 
     useEffect(() => {
@@ -33,6 +49,46 @@ const Roadmap = () => {
             }
 
             try {
+                // Check for selected card from navigation state or localStorage
+                const cardFromState = location.state?.selectedCard as CreditCard | undefined;
+                const cardFromStorage = localStorage.getItem('selectedCardForRoadmap');
+                const card = cardFromState || (cardFromStorage ? JSON.parse(cardFromStorage) : null);
+                
+                if (card) {
+                    setSelectedCard(card);
+                    // Store in localStorage if it came from state
+                    if (cardFromState && !cardFromStorage) {
+                        localStorage.setItem('selectedCardForRoadmap', JSON.stringify(card));
+                    }
+                }
+
+                // Check local storage for cached roadmap
+                const cachedData = localStorage.getItem('roadmapCache');
+                if (cachedData) {
+                    try {
+                        const { userId, roadmap: cachedRoadmap, timestamp } = JSON.parse(cachedData);
+                        
+                        // Check if cache is for current user and is less than 7 days old
+                        const cacheAge = Date.now() - timestamp;
+                        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+                        
+                        if (userId === currentUser.uid && cacheAge < maxAge && cachedRoadmap.length > 0) {
+                            console.log('Using cached roadmap');
+                            // Still fetch user data for display purposes
+                            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                            if (userDoc.exists()) {
+                                setUserData(userDoc.data() as UserData);
+                            }
+                            setRoadmap(cachedRoadmap);
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing cached roadmap:', parseError);
+                        // Continue to generate new roadmap if cache is invalid
+                    }
+                }
+
                 // Fetch user data from Firestore
                 const userDoc = await getDoc(doc(db, "users", currentUser.uid));
 
@@ -46,6 +102,15 @@ const Roadmap = () => {
                         milestonesData as Milestone[]
                     );
                     setRoadmap(milestones);
+
+                    // Cache the roadmap in local storage
+                    const cacheData = {
+                        userId: currentUser.uid,
+                        roadmap: milestones,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('roadmapCache', JSON.stringify(cacheData));
+                    console.log('Roadmap generated and cached');
                 } else {
                     setError("User profile not found. Please complete the survey first.");
                 }
@@ -58,7 +123,7 @@ const Roadmap = () => {
         }
 
         fetchUserDataAndGenerateRoadmap();
-    }, [currentUser]);
+    }, [currentUser, location.state]);
 
     // Get milestone icon based on tags and difficulty
     const getMilestoneIcon = (milestone: Milestone) => {
@@ -91,6 +156,18 @@ const Roadmap = () => {
                 // Trigger celebration effect
                 setCelebratingMilestone(milestoneId);
                 setTimeout(() => setCelebratingMilestone(null), 2000);
+            }
+            
+            // Save to local storage
+            if (currentUser) {
+                try {
+                    localStorage.setItem(
+                        `completedMilestones_${currentUser.uid}`,
+                        JSON.stringify(Array.from(newSet))
+                    );
+                } catch (error) {
+                    console.error('Error saving completed milestones to cache:', error);
+                }
             }
             
             return newSet;
@@ -355,6 +432,78 @@ const Roadmap = () => {
                             </motion.div>
                         );
                     })}
+
+                    {/* Card Application Milestone - Final Goal (Centered Below Line) */}
+                    {selectedCard && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: roadmap.length * 0.15 }}
+                            className="relative mb-24 flex items-center justify-center"
+                        >
+                            {/* Centered Milestone Node */}
+                            <div className="relative flex flex-col items-center">
+                                {/* Node Card */}
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        // Create a special milestone for the card
+                                        const cardMilestone: Milestone = {
+                                            id: `apply_card_${selectedCard.id}`,
+                                            title: `Apply for ${selectedCard.name}`,
+                                            description: `Complete your credit journey by applying for the ${selectedCard.name}. This card matches your spending habits and financial profile.`,
+                                            tags: ["credit_card", "application", "goal"],
+                                            difficulty: "medium",
+                                            requirements: ["Complete all previous milestones", "Review card benefits", "Ensure you meet eligibility requirements"],
+                                            reward_xp: 500
+                                        };
+                                        setSelectedMilestone(cardMilestone);
+                                    }}
+                                    className="relative cursor-pointer transition-all"
+                                >
+                                    {/* Main Node Circle */}
+                                    <div className="flex flex-col items-center">
+
+                                        {/* Title Card */}
+                                        <div className="mt-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl shadow-lg p-4 max-w-xs border-2 border-[#D2A0F0]">
+                                            <h3 className="text-sm font-bold text-gray-900 text-center mb-2">
+                                                Apply for {selectedCard.name}
+                                            </h3>
+                                            
+                                            {/* Card Image Preview */}
+                                            {selectedCard.image_url && (
+                                                <div className="mb-3 bg-white rounded-lg p-2 shadow-sm">
+                                                    <img
+                                                        src={selectedCard.image_url}
+                                                        alt={selectedCard.name}
+                                                        className="w-full h-16 object-contain"
+                                                    />
+                                                </div>
+                                            )}
+                                            
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full border border-yellow-200">
+                                                    <TrophyIcon className="w-3 h-3 text-yellow-600" />
+                                                    <span className="text-xs font-semibold text-yellow-700">
+                                                        500 XP
+                                                    </span>
+                                                </div>
+                                                <div className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                                    FINAL GOAL
+                                                </div>
+                                            </div>
+
+                                            {/* Step Number Badge */}
+                                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md border-2 border-white">
+                                                🏆
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
 
                 {/* Summary Stats */}
@@ -367,7 +516,7 @@ const Roadmap = () => {
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                             <div className="text-3xl font-bold text-[#D2A0F0]">
-                                {completedMilestones.size}/{roadmap.length}
+                                {completedMilestones.size}/{roadmap.length + (selectedCard ? 1 : 0)}
                             </div>
                             <div className="text-xs text-gray-600 mt-1">Completed</div>
                         </div>
@@ -382,7 +531,7 @@ const Roadmap = () => {
                         </div>
                         <div>
                             <div className="text-3xl font-bold text-[#80B3ED]">
-                                {roadmap.reduce((sum, m) => sum + m.reward_xp, 0)}
+                                {roadmap.reduce((sum, m) => sum + m.reward_xp, 0) + (selectedCard ? 500 : 0)}
                             </div>
                             <div className="text-xs text-gray-600 mt-1">Total XP</div>
                         </div>
@@ -440,7 +589,7 @@ const Roadmap = () => {
                                             >
                                                 {selectedMilestone.difficulty.toUpperCase()}
                                             </span>
-                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white bg-opacity-20">
+                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white text-green-500 bg-opacity-20">
                                                 {selectedMilestone.reward_xp} XP
                                             </span>
                                         </div>
@@ -459,6 +608,59 @@ const Roadmap = () => {
                                         {selectedMilestone.description}
                                     </p>
                                 </div>
+
+                                {/* Card Details for Application Milestone */}
+                                {selectedMilestone.id.startsWith('apply_card_') && selectedCard && (
+                                    <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-[#D2A0F0]">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                            Your Selected Card
+                                        </h3>
+                                        
+                                        {/* Card Preview */}
+                                        {selectedCard.image_url && (
+                                            <div className="mb-4 bg-white rounded-lg p-3 shadow-sm">
+                                                <img
+                                                    src={selectedCard.image_url}
+                                                    alt={selectedCard.name}
+                                                    className="w-full h-32 object-contain"
+                                                />
+                                            </div>
+                                        )}
+                                        
+                                        {/* Card Info */}
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center pb-2 border-b border-purple-200">
+                                                <span className="text-sm text-gray-600">Card Name</span>
+                                                <span className="text-sm font-bold text-gray-900">{selectedCard.name}</span>
+                                            </div>
+                                            
+                                            {selectedCard.rewardsType && (
+                                                <div className="flex justify-between items-center pb-2 border-b border-purple-200">
+                                                    <span className="text-sm text-gray-600">Rewards Type</span>
+                                                    <span className="text-sm font-bold text-gray-900 capitalize">{selectedCard.rewardsType}</span>
+                                                </div>
+                                            )}
+                                            
+                                            {(selectedCard.annualFee !== undefined || selectedCard.annual_fee) && (
+                                                <div className="flex justify-between items-center pb-2 border-b border-purple-200">
+                                                    <span className="text-sm text-gray-600">Annual Fee</span>
+                                                    <span className="text-sm font-bold text-gray-900">
+                                                        {selectedCard.annualFee !== undefined ? `$${selectedCard.annualFee}` : selectedCard.annual_fee}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            {selectedCard.eligibility_requirements?.credit_score && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">Min. Credit Score</span>
+                                                    <span className="text-sm font-bold text-gray-900 capitalize">
+                                                        {selectedCard.eligibility_requirements.credit_score}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Tags */}
                                 <div>
@@ -520,21 +722,51 @@ const Roadmap = () => {
 
                                 {/* Action Button */}
                                 <div className="space-y-3">
-                                    <button
-                                        onClick={() => {
-                                            toggleMilestoneCompletion(selectedMilestone.id);
-                                            // Close sidebar after completion
-                                            setTimeout(() => setSelectedMilestone(null), 1500);
-                                        }}
-                                        className={`w-full py-4 rounded-xl font-bold text-white transition-all ${completedMilestones.has(selectedMilestone.id)
-                                                ? "bg-[#7FC656] hover:opacity-90"
-                                                : "bg-[#D2A0F0] hover:opacity-90 shadow-lg hover:shadow-xl"
-                                            }`}
-                                    >
-                                        {completedMilestones.has(selectedMilestone.id)
-                                            ? "✓ Mark as Incomplete"
-                                            : "🎉 Mark as Complete"}
-                                    </button>
+                                    {/* Special handling for card application milestone */}
+                                    {selectedMilestone.id.startsWith('apply_card_') && selectedCard ? (
+                                        <>
+                                            {selectedCard.application_url && (
+                                                <a
+                                                    href={selectedCard.application_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#D2A0F0] to-[#80B3ED] hover:opacity-90 shadow-lg hover:shadow-xl transition-all text-center"
+                                                >
+                                                    🚀 Apply for {selectedCard.name}
+                                                </a>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    toggleMilestoneCompletion(selectedMilestone.id);
+                                                    setTimeout(() => setSelectedMilestone(null), 1500);
+                                                }}
+                                                className={`w-full py-4 rounded-xl font-bold text-white transition-all ${completedMilestones.has(selectedMilestone.id)
+                                                        ? "bg-[#7FC656] hover:opacity-90"
+                                                        : "bg-gray-600 hover:opacity-90"
+                                                    }`}
+                                            >
+                                                {completedMilestones.has(selectedMilestone.id)
+                                                    ? "✓ Mark as Incomplete"
+                                                    : "✓ I've Applied"}
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                toggleMilestoneCompletion(selectedMilestone.id);
+                                                // Close sidebar after completion
+                                                setTimeout(() => setSelectedMilestone(null), 1500);
+                                            }}
+                                            className={`w-full py-4 rounded-xl font-bold text-white transition-all ${completedMilestones.has(selectedMilestone.id)
+                                                    ? "bg-[#7FC656] hover:opacity-90"
+                                                    : "bg-[#D2A0F0] hover:opacity-90 shadow-lg hover:shadow-xl"
+                                                }`}
+                                        >
+                                            {completedMilestones.has(selectedMilestone.id)
+                                                ? "✓ Mark as Incomplete"
+                                                : "🎉 Mark as Complete"}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
