@@ -57,14 +57,14 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+    <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 mb-16">
+        <div className="bg-white p-8 rounded-2xl border border-gray-200">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            <h2 className="text-3xl font-manrope font-bold text-gray-900 mb-2">
+              {isSignUp ? 'Create Account' : 'Welcome Back!'}
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-sm mb-8" style={{ color: '#4C4C4C' }}>
               {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
             </p>
           </div>
@@ -85,7 +85,7 @@ function Login() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter your email"
                 required
               />
@@ -100,7 +100,7 @@ function Login() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter your password"
                 required
               />
@@ -109,7 +109,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none"
+              className="w-full bg-black hover:bg-gray-900 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-full transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -131,7 +131,7 @@ function Login() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
+                <span className="px-4 bg-white font-medium" style={{ color: '#4C4C4C' }}>Or continue with</span>
               </div>
             </div>
             
@@ -139,7 +139,7 @@ function Login() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none"
+                className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-full bg-white text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none"
               >
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -152,12 +152,17 @@ function Login() {
             </div>
           </div>
           
-          <div className="mt-8 text-center">
+          <div className="mt-4 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="transition-colors"
             >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              <span className="text-gray-500 text-sm">
+                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+              </span>
+              <span className="text-gray-500 text-sm hover:text-black underline">
+                {isSignUp ? 'Sign In' : 'Sign Up'}
+              </span>
             </button>
           </div>
         </div>
