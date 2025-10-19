@@ -283,8 +283,8 @@ function AppContent() {
                 alt="" 
                 className="absolute w-40 h-40 z-10 cursor-pointer" 
                 style={{ right: '3%', bottom: '3%' }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 whileHover={{ 
                   y: -10, 
                   rotate: 5,
@@ -293,8 +293,8 @@ function AppContent() {
                 transition={{ 
                   opacity: { duration: 0.5, delay: 0.85 },
                   scale: { duration: 0.5, delay: 0.85, type: "spring", stiffness: 100 },
-                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 },
-                  rotate: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                  y: { duration: 0.3, type: "spring", stiffness: 300 },
+                  rotate: { duration: 0.3, type: "spring", stiffness: 300 }
                 }}
               />
               
