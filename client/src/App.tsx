@@ -333,7 +333,7 @@ function AppContent() {
                       <p className="text-green-700 mb-4">Welcome back, {currentUser.email}</p>
                       <a 
                         href="/dashboard" 
-                        className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+                        className="inline-block bg-black hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
                       >
                         Go to Dashboard
                       </a>
