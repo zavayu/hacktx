@@ -45,12 +45,20 @@ function Navbar() {
                 Home
               </Link>
               {currentUser && (
-                <Link 
-                  to="/dashboard" 
-                  className="text-gray-700 hover:text-[#D2A0F0] px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link 
+                    to="/dashboard" 
+                    className="text-gray-700 hover:text-[#D2A0F0] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    to="/roadmap" 
+                    className="text-gray-700 hover:text-[#D2A0F0] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Roadmap
+                  </Link>
+                </>
               )}
             </div>
 
