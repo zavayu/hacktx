@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { analyzePurchases, getSpendingInsights } from '../utils/purchaseAnalysis';
+import { analyzePurchases } from '../utils/purchaseAnalysis';
 import type { Purchase } from '../utils/purchaseAnalysis';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
@@ -57,10 +57,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
   }, [currentUser]);
 
   const purchases = userData?.purchases || [];
-  const customerName = userData?.customerName || currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Customer';
-  
   const profile = analyzePurchases(purchases);
-  const insights = getSpendingInsights(profile);
 
   // Prepare spending pattern data for radar chart
   const radarChartData = {
@@ -113,28 +110,14 @@ const Dashboard: React.FC<DashboardProps> = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-manrope">
-            Your Spending Analysis
-          </h1>
-          <p className="text-xl text-gray-600">
-            We've analyzed {customerName}'s spending patterns to create your unique financial profile.
-          </p>
-        </motion.div>
-
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 lg:items-stretch">
           {/* Left Column: Credit Score + Radar Chart */}
           <div className="flex flex-col gap-6 h-full">
             {/* Credit Score Card */}
-          <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="bg-white p-6 rounded-2xl shadow-lg border-0 relative"
             >
@@ -206,28 +189,6 @@ const Dashboard: React.FC<DashboardProps> = () => {
             </div>
           </motion.div>
         </div>
-
-        {/* Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white p-8 rounded-2xl shadow-lg"
-        >
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Personalized Insights</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {insights.map((insight, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="text-gray-700">{insight}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
 
         {/* Credit Card Recommendations */}
         <motion.div

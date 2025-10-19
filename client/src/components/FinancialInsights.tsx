@@ -200,9 +200,9 @@ export function FinancialInsights({
 
             {/* Category Breakdown - 2 Column Grid */}
             <div>
-              <p className="text-xs text-gray-500 mb-2 font-medium">
+              {/* <p className="text-xs text-gray-500 mb-2 font-medium">
                 Spending by Category
-              </p>
+              </p> */}
               <div className="grid grid-cols-2 gap-2">
                 {categoryDisplay.map((category, index) => {
                   const emoji =

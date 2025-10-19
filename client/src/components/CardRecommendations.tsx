@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useCardRecommendations } from "../utils/useCardRecommendations";
 import { motion } from "framer-motion";
 import CardModal from "./CardModal";
-import type { CreditCard } from "../utils/creditCardMatcher";
+import type { CreditCard, UserProfile } from "../utils/creditCardMatcher";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 /**
  * Component to display credit card recommendations
@@ -17,6 +20,62 @@ export default function CardRecommendations() {
         card: CreditCard;
         similarity: number;
     } | null>(null);
+    const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(true);
+
+    // Fetch user profile for personalized insights
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!currentUser?.uid) return;
+            
+            try {
+                const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    setUserProfile({
+                        creditScore: data.creditScore || "",
+                        annualIncome: data.annualIncome || "",
+                        employmentStatus: data.employmentStatus || "",
+                        hasCreditCards: data.hasCreditCards || "no",
+                        creditCards: data.creditCards || [],
+                        creditLength: data.creditLength || "",
+                        latePayments: data.latePayments || "none",
+                        creditGoal: data.creditGoal || "",
+                        citizenshipStatus: data.citizenshipStatus || "",
+                        purchases: data.purchases || [],
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching user profile:", err);
+            }
+        };
+
+        fetchUserProfile();
+    }, [currentUser]);
+
+    const handleScroll = () => {
+        if (scrollContainerRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+            setShowLeftArrow(scrollLeft > 10);
+            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    };
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = 300;
+            const newScrollLeft = direction === 'left'
+                ? scrollContainerRef.current.scrollLeft - scrollAmount
+                : scrollContainerRef.current.scrollLeft + scrollAmount;
+            
+            scrollContainerRef.current.scrollTo({
+                left: newScrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     if (loading) {
         return (
@@ -97,7 +156,7 @@ export default function CardRecommendations() {
 
     return (
         <>
-            <div className="bg-white rounded-2xl border border-gray-100 p-8">
+            <div className="bg-white rounded-2xl border border-gray-100 p-8 overflow-visible">
                 {/* Rank Badge */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -118,8 +177,42 @@ export default function CardRecommendations() {
                     <p className="text-gray-600">{badge.description}</p>
                 </motion.div>
 
-                {/* Card Journey - Single Pole Layout */}
-                <div className="relative max-w-5xl mx-auto py-12">
+                {/* Card Journey - Horizontal Wavy Path */}
+                <div className="relative w-full">
+                    {/* Left Arrow */}
+                    {showLeftArrow && cards.length > 0 && (
+                        <motion.button
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => scroll('left')}
+                            style={{ backgroundColor: '#D2A0F0' }}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-30 text-white p-3 rounded-full shadow-xl transition-all"
+                        >
+                            <ChevronLeft className="w-6 h-6" />
+                        </motion.button>
+                    )}
+
+                    {/* Right Arrow */}
+                    {showRightArrow && cards.length > 0 && (
+                        <motion.button
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => scroll('right')}
+                            style={{ backgroundColor: '#D2A0F0' }}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-30 text-white p-3 rounded-full shadow-xl transition-all"
+                        >
+                            <ChevronRight className="w-6 h-6" />
+                        </motion.button>
+                    )}
+
+                    <div 
+                        ref={scrollContainerRef}
+                        onScroll={handleScroll}
+                        className="relative w-full overflow-x-auto overflow-y-visible py-32 px-4 scrollbar-hide" 
+                        style={{ minHeight: '600px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
                     {cards.length === 0 ? (
                         <p className="text-gray-500 text-center py-8">
                             No recommendations available. Please complete your
@@ -127,123 +220,117 @@ export default function CardRecommendations() {
                         </p>
                     ) : (
                         <>
-                            {/* Continuous Purple Pole */}
-                            <div className="absolute left-1/2 top-0 bottom-0 transform -translate-x-1/2 w-1 bg-gradient-to-b from-purple-300 via-purple-400 to-purple-500"></div>
-
-                            {/* Top Decoration */}
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.2, type: "spring" }}
-                                className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full border-4 border-white shadow-lg z-10 flex items-center justify-center"
+                            {/* Wavy Path SVG */}
+                            <svg
+                                className="absolute top-1/2 left-0 w-full h-64 transform -translate-y-1/2 pointer-events-none z-0"
+                                viewBox="0 0 2400 200"
+                                preserveAspectRatio="none"
                             >
-                                <span className="text-2xl">⭐</span>
-                            </motion.div>
-
-                            {/* Cards alternating left and right */}
-                            <div className="space-y-16">
-                                {cards.map((recommendation, index) => {
-                                    const isLeft = index % 2 === 0;
-                                    return (
-                                        <motion.div
-                                            key={index}
-                                            initial={{
-                                                opacity: 0,
-                                                x: isLeft ? -100 : 100,
-                                            }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{
-                                                delay: index * 0.2,
-                                                type: "spring",
-                                                stiffness: 100,
-                                            }}
-                                            className={`relative flex items-center ${
-                                                isLeft
-                                                    ? "justify-end pr-8 md:pr-12"
-                                                    : "justify-start pl-8 md:pl-12"
-                                            }`}
-                                        >
-                                            {/* Connector Line */}
-                                            <svg
-                                                className={`absolute top-1/2 ${
-                                                    isLeft
-                                                        ? "right-0"
-                                                        : "left-0"
-                                                } transform -translate-y-1/2 z-0`}
-                                                width={isLeft ? "100" : "100"}
-                                                height="4"
-                                                style={{
-                                                    [isLeft ? "right" : "left"]:
-                                                        "50%",
-                                                }}
-                                            >
-                                                <motion.line
+                                <motion.path
+                                    d="M 150 100 Q 375 30, 600 100 T 1050 100 T 1500 100 T 1950 100 T 2400 100"
+                                    stroke="#D2A0F0"
+                                    strokeWidth="4"
+                                    fill="none"
+                                    strokeLinecap="round"
                                                     initial={{ pathLength: 0 }}
                                                     animate={{ pathLength: 1 }}
-                                                    transition={{
-                                                        delay:
-                                                            index * 0.2 + 0.3,
-                                                        duration: 0.5,
-                                                    }}
-                                                    x1={isLeft ? "100" : "0"}
-                                                    y1="2"
-                                                    x2={isLeft ? "0" : "100"}
-                                                    y2="2"
-                                                    stroke="url(#gradient)"
-                                                    strokeWidth="3"
-                                                    strokeLinecap="round"
-                                                />
-                                                <defs>
-                                                    <linearGradient
-                                                        id="gradient"
-                                                        x1="0%"
-                                                        y1="0%"
-                                                        x2="100%"
-                                                        y2="0%"
-                                                    >
-                                                        <stop
-                                                            offset="0%"
-                                                            stopColor="#c084fc"
-                                                        />
-                                                        <stop
-                                                            offset="100%"
-                                                            stopColor="#a855f7"
-                                                        />
-                                                    </linearGradient>
-                                                </defs>
+                                    transition={{ duration: 2, ease: "easeInOut" }}
+                                />
                                             </svg>
 
-                                            {/* Node on pole */}
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{
-                                                    delay: index * 0.2 + 0.2,
-                                                    type: "spring",
-                                                }}
-                                                className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-white border-4 border-purple-400 rounded-full shadow-md z-10 flex items-center justify-center"
-                                            >
-                                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                            </motion.div>
-
+                            {/* Cards along the wavy path */}
+                            <div className="relative flex items-center justify-start gap-8 min-w-max pl-8 pr-24 z-10">
+                                {cards.map((recommendation, index) => {
+                                    // Create wave effect: alternate up and down (even cards higher, odd cards lower)
+                                    const waveOffset = index % 2 === 0 ? -70 : 70;
+                                    const delay = index * 0.15;
+                                    
+                                    // Get star color based on rank
+                                    const getStarIcon = (position: number) => {
+                                        switch(position) {
+                                            case 0: return '/greenstar.svg';  // 1st place
+                                            case 1: return '/bluestar.svg';   // 2nd place
+                                            case 2: return '/purplestar.svg'; // 3rd place
+                                            case 3: return '/redstar.svg';    // 4th place
+                                            default: return '/purplestar.svg'; // 5th place
+                                        }
+                                    };
+                                    
+                                    const getRankNumber = (position: number) => position + 1;
+                                    
+                                    const getRankSuffix = (position: number) => {
+                                        switch(position) {
+                                            case 0: return 'st';
+                                            case 1: return 'nd';
+                                            case 2: return 'rd';
+                                            case 3: return 'th';
+                                            default: return 'th';
+                                        }
+                                    };
+                                    
+                                    const randomRotation = (Math.random() - 0.5) * 4; // Random rotation between -2 and 2 degrees
+                                    
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="relative flex-shrink-0 mx-6"
+                                            style={{
+                                                transform: `translateY(${waveOffset}px)`,
+                                            }}
+                                        >
                                             {/* Card Container */}
                                             <motion.div
-                                                whileHover={{
-                                                    scale: 1.03,
-                                                    rotate: isLeft ? -1 : 1,
+                                                initial={{
+                                                    opacity: 0,
+                                                    scale: 0.8,
                                                 }}
-                                                whileTap={{ scale: 0.98 }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    scale: 1,
+                                                    rotate: 0,
+                                                    transition: {
+                                                        duration: 0.1,
+                                                        ease: "easeOut",
+                                                    }
+                                                }}
+                                                whileHover={{
+                                                    scale: 1.05,
+                                                    y: -8,
+                                                    rotate: randomRotation,
+                                                    transition: {
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 15,
+                                                    }
+                                                }}
+                                                transition={{
+                                                    delay: delay + 0.5,
+                                                    duration: 0.6,
+                                                    ease: [0.25, 0.46, 0.45, 0.94],
+                                                }}
                                                 onClick={() =>
                                                     setSelectedCard(
                                                         recommendation
                                                     )
                                                 }
-                                                className="relative cursor-pointer group max-w-md w-full"
+                                                className="relative cursor-pointer w-56"
                                             >
-                                                <div className="bg-white rounded-3xl p-6 shadow-lg border-2 border-gray-100 group-hover:border-purple-300 group-hover:shadow-2xl transition-all duration-300">
-                                                    <div className="flex items-center gap-4">
+                                                <div className="bg-white rounded-2xl p-4 shadow-lg border-2 border-gray-200 transition-all duration-300 relative">
+                                                    {/* Match Score - Top Right */}
+                                                    <div className="absolute -top-2 -right-2 z-20">
+                                                        <div className="text-white px-3 py-1 rounded-full shadow-lg text-[10px] font-semibold" style={{ backgroundColor: '#D2A0F0' }}>
+                                                            {(
+                                                                recommendation.similarity *
+                                                                100
+                                                            ).toFixed(
+                                                                0
+                                                            )}
+                                                            % match
+                                                        </div>
+                                                    </div>
+
                                                         {/* Card Image */}
-                                                        <div className="flex-shrink-0">
+                                                    <div className="mb-3 bg-white rounded-xl p-2 shadow-sm">
                                                             {recommendation.card
                                                                 .image_url ? (
                                                                 <img
@@ -257,11 +344,11 @@ export default function CardRecommendations() {
                                                                             .card
                                                                             .name
                                                                     }
-                                                                    className="w-32 h-20 object-contain"
+                                                                className="w-full h-28 object-contain"
                                                                 />
                                                             ) : (
-                                                                <div className="w-32 h-20 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl flex items-center justify-center">
-                                                                    <span className="text-3xl">
+                                                            <div className="w-full h-28 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#D2A0F0' }}>
+                                                                <span className="text-5xl">
                                                                         💳
                                                                     </span>
                                                                 </div>
@@ -269,75 +356,54 @@ export default function CardRecommendations() {
                                                         </div>
 
                                                         {/* Card Info */}
-                                                        <div className="flex-1">
-                                                            <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2">
+                                                    <div className="space-y-2">
+                                                        <h3 className="font-bold text-gray-900 text-base line-clamp-2 min-h-[2.5rem] font-manrope">
                                                                 {
                                                                     recommendation
                                                                         .card
                                                                         .name
                                                                 }
                                                             </h3>
+
                                                             <button
-                                                                onClick={() =>
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                     setSelectedCard(
                                                                         recommendation
-                                                                    )
-                                                                }
-                                                                className="text-sm bg-black text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-800 transition-all"
-                                                            >
-                                                                Learn More
+                                                                );
+                                                            }}
+                                                            className="w-full text-xs bg-black text-white py-2 px-3 rounded-lg font-semibold hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-2"
+                                                        >
+                                                            View Details
+                                                            <ArrowRight className="w-3 h-3" />
                                                             </button>
+                                                    </div>
                                                         </div>
 
-                                                        {/* Match Score Badge */}
-                                                        <div className="flex-shrink-0">
-                                                            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg border-3 border-white group-hover:scale-110 transition-transform">
-                                                                <div className="text-center">
-                                                                    <div className="text-white font-bold text-lg leading-none">
-                                                                        {(
-                                                                            recommendation.similarity *
-                                                                            100
-                                                                        ).toFixed(
-                                                                            0
-                                                                        )}
-                                                                        %
+                                                {/* Rank indicator - Star Sticker */}
+                                                <div className="absolute -top-4 -left-4 w-16 h-16 z-10">
+                                                    <div className="relative w-full h-full">
+                                                        <img 
+                                                            src={getStarIcon(index)}
+                                                            alt={`Rank ${index + 1}`}
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center pt-1">
+                                                            <span className="text-black font-bold font-manrope">
+                                                                <span className="text-base">{getRankNumber(index)}</span>
+                                                                <span className="text-[10px]">{getRankSuffix(index)}</span>
+                                                            </span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Rank indicator */}
-                                                <div
-                                                    className={`absolute ${
-                                                        isLeft
-                                                            ? "-left-2"
-                                                            : "-right-2"
-                                                    } -top-2 bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md`}
-                                                >
-                                                    #{index + 1}
-                                                </div>
                                             </motion.div>
-                                        </motion.div>
+                                                </div>
                                     );
                                 })}
                             </div>
-
-                            {/* Bottom Decoration */}
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{
-                                    delay: cards.length * 0.2 + 0.3,
-                                    type: "spring",
-                                }}
-                                className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full border-4 border-white shadow-lg z-10 flex items-center justify-center"
-                            >
-                                <span className="text-2xl">🎯</span>
-                            </motion.div>
                         </>
                     )}
+                    </div>
                 </div>
             </div>
 
@@ -347,6 +413,7 @@ export default function CardRecommendations() {
                 similarity={selectedCard?.similarity}
                 isOpen={selectedCard !== null}
                 onClose={() => setSelectedCard(null)}
+                userProfile={userProfile}
             />
         </>
     );
