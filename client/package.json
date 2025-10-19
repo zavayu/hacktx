@@ -10,13 +10,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "clsx": "^2.1.1",
+    "compute-cosine-similarity": "^1.1.0",
+    "credit-card-db-api": "^1.0.0",
     "firebase": "^12.4.0",
     "framer-motion": "^12.23.24",
+    "lucide-react": "^0.546.0",
     "react": "^19.1.1",
     "react-confetti": "^6.1.0",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "recharts": "^3.3.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
