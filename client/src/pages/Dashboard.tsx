@@ -1,16 +1,102 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { analyzePurchases, formatCurrency, formatPercentage, getSpendingInsights } from '../utils/purchaseAnalysis';
 import type { Purchase } from '../utils/purchaseAnalysis';
+import { useAuth } from '../contexts/AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface DashboardProps {
   purchases?: Purchase[];
   customerName?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ purchases = [], customerName = "Customer" }) => {
+interface UserData {
+  bankLinked?: boolean;
+  creditScore?: string;
+  annualIncome?: string;
+  employmentStatus?: string;
+  hasCreditCards?: string;
+  creditCards?: string[];
+  creditLength?: string;
+  latePayments?: string;
+  creditGoal?: string;
+  purchases?: Purchase[];
+  customerName?: string;
+  numPurchases?: number;
+}
+
+const Dashboard: React.FC<DashboardProps> = () => {
+  const { currentUser } = useAuth();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+          setUserData(userDoc.data() as UserData);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, [currentUser]);
+
+  const purchases = userData?.purchases || [];
+  const customerName = userData?.customerName || currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Customer';
+  
   const profile = analyzePurchases(purchases);
   const insights = getSpendingInsights(profile);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData?.bankLinked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center py-12 px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white p-8 rounded-2xl shadow-lg max-w-md text-center"
+        >
+          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Profile</h2>
+          <p className="text-gray-600 mb-6">
+            To see your personalized dashboard, please complete the onboarding survey and link your bank account.
+          </p>
+          <a
+            href="/survey"
+            className="inline-block bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            Complete Survey
+          </a>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Pentagon chart data for spending categories
   const radarData = {
