@@ -4,6 +4,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Confetti from 'react-confetti';
 
 function Survey() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -21,6 +22,8 @@ function Survey() {
   });
   const [loading, setLoading] = useState(false);
   const [bankLoading, setBankLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const creditCardsRef = useRef<HTMLDivElement>(null);
@@ -36,6 +39,20 @@ function Survey() {
       }, 500);
     }
   }, [answers.hasCreditCards]);
+
+  // Track window dimensions for confetti
+  useEffect(() => {
+    const updateDimensions = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
 
   const handleLinkBank = async () => {
     setBankLoading(true);
@@ -103,6 +120,10 @@ function Survey() {
       }
 
       setAnswers(prev => ({ ...prev, bankLinked: true }));
+      
+      // Trigger confetti animation
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Stop confetti after 5 seconds
       
     } catch (error) {
       console.error('❌ Error linking bank account:', error);
@@ -945,6 +966,16 @@ function Survey() {
 
   return (
     <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      {showConfetti && (
+        <Confetti
+          width={windowDimensions.width}
+          height={windowDimensions.height}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.3}
+          colors={['#D2A0F0', '#8B5CF6', '#A855F7', '#C084FC', '#E879F9']}
+        />
+      )}
       <div className="max-w-2xl w-full mx-auto">
         <div className="bg-white p-8 rounded-2xl border border-gray-100">
           {/* Progress Bar */}
