@@ -39,31 +39,68 @@ function Survey() {
   const handleLinkBank = async () => {
     setBankLoading(true);
     try {
-      const customerId = "68f453459683f20dd51a123b";
-      
-      const response = await fetch(`http://127.0.0.1:8000/customers/${customerId}/purchase_data`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const purchaseData = await response.json();
-      console.log('📊 Purchase data received:', purchaseData);
-      
-      // Store the data in Firebase
+      // Generate fake customer and purchase data locally (no backend calls)
+      const categories = [
+        'restaurants',
+        'travel',
+        'hotel',
+        'streaming-services',
+        'groceries',
+        'gas',
+        'online-shopping',
+        'airport-lounge'
+      ];
+      const merchantsByCategory: Record<string, string[]> = {
+        'restaurants': ['Chick-fil-A', 'McDonalds', 'Chipotle', 'Olive Garden'],
+        'travel': ['United Airlines', 'Delta', 'Southwest', 'American Airlines'],
+        'hotel': ['Marriott', 'Hilton', 'Hyatt', 'Holiday Inn'],
+        'streaming-services': ['Netflix', 'Spotify', 'Disney+', 'Hulu'],
+        'groceries': ['Whole Foods', 'Trader Joes', 'HEB', 'Kroger'],
+        'gas': ['Shell', 'Exxon', 'Chevron', 'BP'],
+        'online-shopping': ['Amazon', 'eBay', 'Etsy', 'Target.com'],
+        'airport-lounge': ['Delta Sky Club', 'United Club']
+      };
+      const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+      const randomDateInPast30 = () => {
+        const now = new Date();
+        const d = new Date(now);
+        d.setDate(now.getDate() - Math.floor(Math.random() * 30));
+        return d.toISOString().slice(0, 10); // YYYY-MM-DD
+      };
+
+      const numPurchases = 10 + Math.floor(Math.random() * 21); // 10 to 30
+      const purchases = Array.from({ length: numPurchases }).map(() => {
+        const category = pick(categories);
+        const merchantName = pick(merchantsByCategory[category]);
+        const amount = Math.round((5 + Math.random() * 495) * 100) / 100; // $5 - $500
+        return {
+          merchant_name: merchantName,
+          category,
+          purchase_date: randomDateInPast30(),
+          amount,
+          status: 'completed',
+          description: `${merchantName} - ${category}`
+        };
+      });
+
+      const customerId = `local_${Math.random().toString(36).slice(2, 10)}`;
+      const customerName = currentUser?.displayName || (currentUser?.email ? currentUser.email.split('@')[0] : 'User');
+
+      // Store the data directly in Firebase
       if (currentUser) {
         await updateDoc(doc(db, 'users', currentUser.uid), {
           bankLinked: true,
-          customerId: purchaseData.customer_id,
-          customerName: purchaseData.customer_name,
-          purchases: purchaseData.purchases,
-          numPurchases: purchaseData.num_purchases,
+          customerId,
+          customerName,
+          purchases,
+          numPurchases,
           lastUpdated: new Date().toISOString()
         });
-        
-        console.log('✅ Purchase data saved to Firebase');
+        console.log('✅ Fake purchase data saved to Firebase');
+      } else {
+        console.warn('No authenticated user; skipping Firestore update');
       }
-      
+
       setAnswers(prev => ({ ...prev, bankLinked: true }));
       
     } catch (error) {
