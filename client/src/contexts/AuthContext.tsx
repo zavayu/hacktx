@@ -8,7 +8,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -35,13 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  function signup(email: string, password: string) {
-    return createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
-      // Check if this is a new user by looking at creation time
-      const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
-      setIsNewUser(isNewUser);
-      return isNewUser;
-    });
+  async function signup(email: string, password: string) {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+    setIsNewUser(isNewUser);
+    if (isNewUser) {
+      // Add user to Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        createdAt: userCredential.user.metadata.creationTime,
+      });
+    }
+    return isNewUser;
   }
 
   function login(email: string, password: string) {
@@ -52,14 +59,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
-  function loginWithGoogle() {
+  async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((userCredential) => {
-      // Check if this is a new user by looking at creation time
-      const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
-      setIsNewUser(isNewUser);
-      return isNewUser;
-    });
+    const userCredential = await signInWithPopup(auth, provider);
+    const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+    setIsNewUser(isNewUser);
+    if (isNewUser) {
+      // Add user to Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        createdAt: userCredential.user.metadata.creationTime,
+      });
+    }
+    return isNewUser;
   }
 
   function logout() {
