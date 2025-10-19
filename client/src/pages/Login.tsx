@@ -22,12 +22,17 @@ function Login() {
       setError('');
       setLoading(true);
       if (isSignUp) {
-        await signup(email, password);
+        const isNewUser = await signup(email, password);
+        // Navigate based on whether this is a new user
+        if (isNewUser) {
+          navigate('/survey');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         await login(email, password);
+        navigate('/dashboard');
       }
-      // Redirect to dashboard after successful login/signup
-      navigate('/dashboard');
     } catch (error: any) {
       setError('Failed to ' + (isSignUp ? 'create account' : 'log in'));
     }
@@ -38,9 +43,13 @@ function Login() {
     try {
       setError('');
       setLoading(true);
-      await loginWithGoogle();
-      // Redirect to dashboard after successful Google sign-in
-      navigate('/dashboard');
+      const isNewUser = await loginWithGoogle();
+      // Navigate based on whether this is a new user
+      if (isNewUser) {
+        navigate('/survey');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       setError('Failed to sign in with Google');
     }

@@ -12,11 +12,12 @@ import { auth } from '../firebase';
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
   loading: boolean;
+  isNewUser: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,18 +33,33 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   function signup(email: string, password: string) {
-    return createUserWithEmailAndPassword(auth, email, password).then(() => {});
+    return createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
+      // Check if this is a new user by looking at creation time
+      const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+      setIsNewUser(isNewUser);
+      return isNewUser;
+    });
   }
 
   function login(email: string, password: string) {
-    return signInWithEmailAndPassword(auth, email, password).then(() => {});
+    return signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+      const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+      setIsNewUser(isNewUser);
+      return isNewUser;
+    });
   }
 
   function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then(() => {});
+    return signInWithPopup(auth, provider).then((userCredential) => {
+      // Check if this is a new user by looking at creation time
+      const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+      setIsNewUser(isNewUser);
+      return isNewUser;
+    });
   }
 
   function logout() {
@@ -54,6 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
+      // Reset isNewUser when user logs out
+      if (!user) {
+        setIsNewUser(false);
+      }
     });
 
     return unsubscribe;
@@ -65,7 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signup,
     loginWithGoogle,
     logout,
-    loading
+    loading,
+    isNewUser
   };
 
   return (
