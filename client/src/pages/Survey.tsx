@@ -35,9 +35,42 @@ function Survey() {
 
   const handleLinkBank = async () => {
     setBankLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setAnswers(prev => ({ ...prev, bankLinked: true }));
-    setBankLoading(false);
+    try {
+      const customerId = "68f453459683f20dd51a123b";
+      
+      const response = await fetch(`http://127.0.0.1:8000/customers/${customerId}/purchase_data`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const purchaseData = await response.json();
+      console.log('📊 Purchase data received:', purchaseData);
+      
+      // Store the data in Firebase
+      if (currentUser) {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          bankLinked: true,
+          customerId: purchaseData.customer_id,
+          customerName: purchaseData.customer_name,
+          purchases: purchaseData.purchases,
+          numPurchases: purchaseData.num_purchases,
+          lastUpdated: new Date().toISOString()
+        });
+        
+        console.log('✅ Purchase data saved to Firebase');
+      }
+      
+      setAnswers(prev => ({ ...prev, bankLinked: true }));
+      
+    } catch (error) {
+      console.error('❌ Error linking bank account:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setAnswers(prev => ({ ...prev, bankLinked: true }));
+      setBankLoading(false);
+    }
   };
 
   const creditScoreOptions = [
