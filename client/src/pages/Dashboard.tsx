@@ -1,25 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { analyzePurchases, formatCurrency, formatPercentage, getSpendingInsights } from '../utils/purchaseAnalysis';
-import type { Purchase } from '../utils/purchaseAnalysis';
+import type { SpendingProfile, Purchase } from '../utils/purchaseAnalysis';
 
 interface DashboardProps {
-  purchases?: Purchase[];
-  customerName?: string;
+  purchases: Purchase[];
+  customerName: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ purchases = [], customerName = "User" }) => {
-  if (!purchases || purchases.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Purchase Data</h2>
-          <p className="text-gray-600">Please complete the survey and link your bank account to see your spending analysis.</p>
-        </div>
-      </div>
-    );
-  }
-
+const Dashboard: React.FC<DashboardProps> = ({ purchases, customerName }) => {
   const profile = analyzePurchases(purchases);
   const insights = getSpendingInsights(profile);
 
@@ -200,7 +189,7 @@ const Dashboard: React.FC<DashboardProps> = ({ purchases = [], customerName = "U
             <p className="text-gray-600 mb-6">What matters most to you</p>
             
             <div className="space-y-4">
-              {profile.categories.slice(0, 5).map((category) => (
+              {profile.categories.slice(0, 5).map((category, index) => (
                 <div key={category.category} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {category.category.replace('-', ' ')}
