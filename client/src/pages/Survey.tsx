@@ -16,7 +16,8 @@ function Survey() {
     creditCards: [] as string[],
     creditLength: '',
     latePayments: '',
-    creditGoal: ''
+    creditGoal: '',
+    citizenshipStatus: ''
   });
   const [loading, setLoading] = useState(false);
   const [bankLoading, setBankLoading] = useState(false);
@@ -151,7 +152,7 @@ function Survey() {
     setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
-  const totalSteps = 8;
+  const totalSteps = 9;
   const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -180,7 +181,8 @@ function Survey() {
           creditCards: answers.creditCards,
           creditLength: answers.creditLength,
           latePayments: answers.latePayments,
-          creditGoal: answers.creditGoal
+          creditGoal: answers.creditGoal,
+          citizenshipStatus: answers.citizenshipStatus
         });
       }
     } catch (err) {
@@ -200,9 +202,15 @@ function Survey() {
       case 6: return answers.creditLength !== '';
       case 7: return answers.latePayments !== '';
       case 8: return answers.creditGoal !== '';
+      case 9: return answers.citizenshipStatus !== '';
       default: return false;
     }
   };
+  const citizenshipOptions = [
+    { value: 'us-citizen', label: 'U.S. Citizen' },
+    { value: 'resident', label: 'Resident' },
+    { value: 'non-us-citizen', label: 'Non-U.S. Citizen' }
+  ];
 
   const creditLengthOptions = [
     { value: 'never', label: 'Never' },
@@ -622,7 +630,7 @@ function Survey() {
           </div>
         );
       case 8:
-        // New: What's your main goal with a credit card?
+        // What's your main goal with a credit card?
         return (
           <div>
             <motion.h2 
@@ -648,6 +656,41 @@ function Survey() {
                     value={option.value}
                     checked={answers.creditGoal === option.value}
                     onChange={(e) => handleAnswer('creditGoal', e.target.value)}
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200 checked:before:bg-[#D2A0F0]"
+                  />
+                  <span className="text-gray-900">{option.label}</span>
+                </motion.label>
+              ))}
+            </div>
+          </div>
+        );
+      case 9:
+        // Citizenship status question
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your citizenship status?
+            </motion.h2>
+            <div className="space-y-3">
+              {citizenshipOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${answers.citizenshipStatus === option.value ? 'bg-purple-50 border-2 border-[#D2A0F0]' : 'border-2 border-gray-200 hover:border-gray-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="citizenshipStatus"
+                    value={option.value}
+                    checked={answers.citizenshipStatus === option.value}
+                    onChange={(e) => handleAnswer('citizenshipStatus', e.target.value)}
                     className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200 checked:before:bg-[#D2A0F0]"
                   />
                   <span className="text-gray-900">{option.label}</span>
