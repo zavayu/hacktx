@@ -4,9 +4,10 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import MultiSelectAutocomplete from "../components/MultiSelectAutocomplete";
+import CreditCardAPI from "credit-card-db-api";
 import Confetti from "react-confetti";
 import { Turnstile } from "@marsidev/react-turnstile";
-import CreditCardAPI from "credit-card-db-api";
 
 function Survey() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -24,6 +25,7 @@ function Survey() {
     });
     const [loading, setLoading] = useState(false);
     const [bankLoading, setBankLoading] = useState(false);
+    const [creditCardOptions, setCreditCardOptions] = useState<string[]>([]);
     const [showConfetti, setShowConfetti] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
     const [showTurnstile, setShowTurnstile] = useState(false);
@@ -31,16 +33,38 @@ function Survey() {
     const { currentUser } = useAuth();
     const creditCardsRef = useRef<HTMLDivElement>(null);
 
-    // Fetch credit card options from the database API
-    const [creditCardOptions, setCreditCardOptions] = useState<string[]>([]);
+    // Load credit cards from API
     useEffect(() => {
-        const api = new CreditCardAPI();
-        const allCards = api.getAll();
-        // Use card names for options, add "None of the above" at the end
-        setCreditCardOptions([
-            ...allCards.map((card: any) => card.name),
-            "None of the above",
-        ]);
+        try {
+            const api = new CreditCardAPI();
+            const allCards = api.getAll();
+
+            // Extract unique card names and sort alphabetically
+            const cardNames = allCards
+                .map((card) => card.name)
+                .filter((name) => name && name.trim() !== "")
+                .sort();
+
+            // Remove duplicates and add "None of the above" at the end
+            const uniqueCards = Array.from(new Set(cardNames));
+            uniqueCards.push("None of the above");
+
+            setCreditCardOptions(uniqueCards);
+            console.log(
+                `Loaded ${uniqueCards.length - 1} credit cards from database`
+            );
+        } catch (error) {
+            console.error("Error loading credit cards:", error);
+            // Fallback to basic list
+            setCreditCardOptions([
+                "Chase Sapphire Preferred",
+                "Capital One Venture",
+                "American Express Gold",
+                "Discover It Cash Back",
+                "Citi Double Cash",
+                "None of the above",
+            ]);
+        }
     }, []);
 
     // Auto-scroll when "Yes" is selected for credit cards
@@ -63,8 +87,8 @@ function Survey() {
 
         setBankLoading(true);
         setShowConfetti(true);
-        window.open('https://verified.capitalone.com/auth/signin', '_blank');
-        
+        window.open("https://verified.capitalone.com/auth/signin", "_blank");
+
         await generateAndSaveBankData();
         setTimeout(() => {
             setShowConfetti(false);
@@ -77,10 +101,10 @@ function Survey() {
         setShowTurnstile(false);
         setBankLoading(true);
         setShowConfetti(true);
-        
-        window.open('https://verified.capitalone.com/auth/signin', '_blank');
+
+        window.open("https://verified.capitalone.com/auth/signin", "_blank");
         generateAndSaveBankData();
-        
+
         setTimeout(() => {
             setShowConfetti(false);
         }, 10000);
@@ -206,7 +230,6 @@ function Survey() {
         { value: "unemployed", label: "Unemployed" },
         { value: "student", label: "Full time student" },
     ];
-
 
     const handleAnswer = (question: string, value: string) => {
         setAnswers((prev) => ({ ...prev, [question]: value }));
@@ -387,7 +410,7 @@ function Survey() {
                                 )}
                             </button>
                         </motion.div>
-                        
+
                         {/* Cloudflare Turnstile Verification */}
                         {showTurnstile && (
                             <motion.div
@@ -401,9 +424,11 @@ function Survey() {
                                 </p>
                                 <div className="flex justify-center">
                                     <Turnstile
-                                        siteKey={import.meta.env.VITE_CF_SITE_KEY}
+                                        siteKey={
+                                            import.meta.env.VITE_CF_SITE_KEY
+                                        }
                                         options={{
-                                            theme: 'light'
+                                            theme: "light",
                                         }}
                                         onSuccess={handleTurnstileSuccess}
                                         onError={handleTurnstileError}
@@ -687,47 +712,30 @@ function Survey() {
                                     }}
                                     className="text-sm text-gray-500 mb-4"
                                 >
-                                    Select one or more options
+                                    Type to search or select from the list
                                 </motion.p>
-                                <div className="mt-2">
-                                    <div className="border-2 border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto bg-white">
-                                        <div className="space-y-2">
-                                            {creditCardOptions.map((card) => (
-                                                <label
-                                                    key={card}
-                                                    className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={answers.creditCards.includes(card)}
-                                                        onChange={(e) => {
-                                                            const isChecked = e.target.checked;
-                                                            if (card === "None of the above") {
-                                                                if (isChecked) {
-                                                                    setAnswers((prev) => ({ ...prev, creditCards: ["None of the above"] }));
-                                                                } else {
-                                                                    setAnswers((prev) => ({ ...prev, creditCards: [] }));
-                                                                }
-                                                            } else {
-                                                                setAnswers((prev) => {
-                                                                    const filtered = prev.creditCards.filter(c => c !== "None of the above");
-                                                                    if (isChecked) {
-                                                                        return { ...prev, creditCards: [...filtered, card] };
-                                                                    } else {
-                                                                        return { ...prev, creditCards: filtered.filter(c => c !== card) };
-                                                                    }
-                                                                });
-                                                            }
-                                                        }}
-                                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 accent-purple-600"
-                                                    />
-                                                    <span className="ml-3 text-gray-700">{card}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-2">Select all cards that apply.</p>
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{
+                                        duration: 0.4,
+                                        delay: 0.3,
+                                        ease: "easeOut",
+                                    }}
+                                >
+                                    <MultiSelectAutocomplete
+                                        options={creditCardOptions}
+                                        selectedValues={answers.creditCards}
+                                        onChange={(values) =>
+                                            setAnswers((prev) => ({
+                                                ...prev,
+                                                creditCards: values,
+                                            }))
+                                        }
+                                        placeholder="Start typing a card name..."
+                                        noneOption="None of the above"
+                                    />
+                                </motion.div>
                             </motion.div>
                         )}
                     </div>
@@ -943,8 +951,8 @@ function Survey() {
                                             )
                                         }
                                         className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
-                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
-                      checked:before:bg-[#D2A0F0]"
+                          before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                          checked:before:bg-[#D2A0F0]"
                                     />
                                     <span className="text-gray-900">
                                         {option.label}
