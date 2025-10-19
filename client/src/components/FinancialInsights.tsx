@@ -154,7 +154,7 @@ export function FinancialInsights({
 
   return (
     <>
-      <Card className="bg-white border-0 shadow-lg h-full flex flex-col">
+      <Card className="bg-white border-0 h-full flex flex-col">
         <CardHeader>
           <CardTitle>Financial Insights</CardTitle>
         </CardHeader>

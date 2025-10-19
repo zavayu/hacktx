@@ -52,7 +52,7 @@ export function SpendingRadarChart({ spendingPattern, topCategory }: SpendingRad
   const topSpendingItem = chartData.find(d => d.spending === maxSpending)
 
   return (
-    <Card className="bg-white border-0 shadow-lg">
+    <Card className="bg-white border-0">
       <CardHeader className="items-center">
         <CardTitle>Your Spending Style</CardTitle>
         <CardDescription>

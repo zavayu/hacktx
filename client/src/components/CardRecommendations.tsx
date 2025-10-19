@@ -156,7 +156,7 @@ export default function CardRecommendations() {
 
     return (
         <>
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 overflow-visible">
+            <div className="bg-white rounded-2xl border border-gray-100 p-8 overflow-visible shadow-sm">
                 {/* Rank Badge */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
