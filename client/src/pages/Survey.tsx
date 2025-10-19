@@ -4,7 +4,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import MultiSelectAutocomplete from "../components/MultiSelectAutocomplete";
+import MultiSelectAutocomplete from "@/components/MultiSelectAutoComplete";
 import CreditCardAPI from "credit-card-db-api";
 import Confetti from "react-confetti";
 import { Turnstile } from "@marsidev/react-turnstile";
