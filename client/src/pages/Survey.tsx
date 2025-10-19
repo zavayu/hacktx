@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 function Survey() {
   const [currentStep, setCurrentStep] = useState(1);
   const [answers, setAnswers] = useState({
+    bankLinked: false,
     creditScore: '',
     annualIncome: '',
     employmentStatus: '',
@@ -15,6 +16,7 @@ function Survey() {
     creditCards: [] as string[]
   });
   const [loading, setLoading] = useState(false);
+  const [bankLoading, setBankLoading] = useState(false);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const creditCardsRef = useRef<HTMLDivElement>(null);
@@ -30,6 +32,13 @@ function Survey() {
       }, 500);
     }
   }, [answers.hasCreditCards]);
+
+  const handleLinkBank = async () => {
+    setBankLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setAnswers(prev => ({ ...prev, bankLinked: true }));
+    setBankLoading(false);
+  };
 
   const creditScoreOptions = [
     { value: 'excellent', label: 'Excellent (720-850)' },
@@ -69,8 +78,9 @@ function Survey() {
     setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
+  const totalSteps = 5;
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -84,11 +94,14 @@ function Survey() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      // Map value to label for creditScore and annualIncome
+      const creditScoreLabel = creditScoreOptions.find(opt => opt.value === answers.creditScore)?.label || '';
+      const annualIncomeLabel = incomeOptions.find(opt => opt.value === answers.annualIncome)?.label || '';
       if (currentUser) {
-        // Update Firestore user document with each answer as a top-level field
         await updateDoc(doc(db, 'users', currentUser.uid), {
-          creditScore: answers.creditScore,
-          annualIncome: answers.annualIncome,
+          bankLinked: answers.bankLinked,
+          creditScore: creditScoreLabel,
+          annualIncome: annualIncomeLabel,
           employmentStatus: answers.employmentStatus,
           hasCreditCards: answers.hasCreditCards,
           creditCards: answers.creditCards
@@ -103,10 +116,11 @@ function Survey() {
 
   const isStepComplete = (step: number) => {
     switch (step) {
-      case 1: return answers.creditScore !== '';
-      case 2: return answers.annualIncome !== '';
-      case 3: return answers.employmentStatus !== '';
-      case 4: return answers.hasCreditCards !== '';
+      case 1: return answers.bankLinked;
+      case 2: return answers.creditScore !== '';
+      case 3: return answers.annualIncome !== '';
+      case 4: return answers.employmentStatus !== '';
+      case 5: return answers.hasCreditCards !== '';
       default: return false;
     }
   };
@@ -114,6 +128,51 @@ function Survey() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        return (
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              Link your bank account
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+              className="text-gray-700 mb-6"
+            >
+              For a more personalized experience, link your bank account.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+              className="flex items-center mt-2"
+            >
+              <button
+                type="button"
+                onClick={handleLinkBank}
+                disabled={answers.bankLinked || bankLoading}
+                className={`px-4 py-2 text-sm rounded-md font-semibold transition-colors flex items-center justify-center ${answers.bankLinked || bankLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-[#D2A0F0] text-white hover:bg-[#b97be2]'}`}
+                style={{ minWidth: 'auto' }}
+              >
+                {bankLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Linking...
+                  </span>
+                ) : answers.bankLinked ? 'Bank Account Linked' : 'Link Bank Account'}
+              </button>
+            </motion.div>
+          </div>
+        );
+      case 2:
         return (
           <div>
             <motion.h2 
@@ -158,7 +217,7 @@ function Survey() {
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div>
             <motion.h2 
@@ -203,7 +262,7 @@ function Survey() {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div>
             <motion.h2 
@@ -248,7 +307,7 @@ function Survey() {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div>
             <motion.h2 
@@ -408,13 +467,13 @@ function Survey() {
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-600">Step {currentStep} of 4</span>
-              <span className="text-sm font-medium text-gray-600">{Math.round((currentStep / 4) * 100)}% Complete</span>
+              <span className="text-sm font-medium text-gray-600">Step {currentStep} of {totalSteps}</span>
+              <span className="text-sm font-medium text-gray-600">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / 4) * 100}%`, backgroundColor: '#D2A0F0' }}
+                style={{ width: `${Math.min(100, Math.max(0, (currentStep / totalSteps) * 100))}%`, backgroundColor: '#D2A0F0' }}
               ></div>
             </div>
           </div>
@@ -434,7 +493,7 @@ function Survey() {
               Previous
             </button>
 
-            {currentStep < 4 ? (
+            {currentStep < totalSteps ? (
               <button
                 onClick={handleNext}
                 disabled={!isStepComplete(currentStep)}
