@@ -105,7 +105,7 @@ function AppContent() {
                 animate={{ 
                   opacity: 1, 
                   scale: 1,
-                  rotate: [-3, 3, -3]
+                  rotate: 0
                 }}
                 whileHover={{ 
                   y: -10, 
@@ -115,7 +115,7 @@ function AppContent() {
                 transition={{ 
                   opacity: { duration: 0.5, delay: 0.3 },
                   scale: { duration: 0.5, delay: 0.3, type: "spring", stiffness: 100 },
-                  rotate: { duration: 4, delay: 0.8, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 0.3, type: "spring", stiffness: 300 },
                   y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
                 }}
               />
@@ -141,8 +141,8 @@ function AppContent() {
                 alt="" 
                 className="absolute w-48 h-48 z-10 cursor-pointer" 
                 style={{ left: '12%', bottom: '5%' }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 whileHover={{ 
                   y: -12, 
                   rotate: -6,
@@ -151,8 +151,8 @@ function AppContent() {
                 transition={{ 
                   opacity: { duration: 0.5, delay: 0.5 },
                   scale: { duration: 0.5, delay: 0.5, type: "spring", stiffness: 100 },
-                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 },
-                  rotate: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                  y: { duration: 0.3, type: "spring", stiffness: 300 },
+                  rotate: { duration: 0.3, type: "spring", stiffness: 300 }
                 }}
               />
               <motion.img 
@@ -220,7 +220,7 @@ function AppContent() {
                 animate={{ 
                   opacity: 1, 
                   scale: 1,
-                  rotate: [-4, 4, -4]
+                  rotate: 0
                 }}
                 whileHover={{ 
                   y: -10, 
@@ -230,7 +230,7 @@ function AppContent() {
                 transition={{ 
                   opacity: { duration: 0.5, delay: 0.45 },
                   scale: { duration: 0.5, delay: 0.45, type: "spring", stiffness: 100 },
-                  rotate: { duration: 5, delay: 1, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 0.3, type: "spring", stiffness: 300 },
                   y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
                 }}
               />
