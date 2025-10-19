@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 function Survey() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -16,6 +17,19 @@ function Survey() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const creditCardsRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll when "Yes" is selected for credit cards
+  useEffect(() => {
+    if (answers.hasCreditCards === 'yes' && creditCardsRef.current) {
+      setTimeout(() => {
+        creditCardsRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center'
+        });
+      }, 500);
+    }
+  }, [answers.hasCreditCards]);
 
   const creditScoreOptions = [
     { value: 'excellent', label: 'Excellent (720-850)' },
@@ -102,20 +116,43 @@ function Survey() {
       case 1:
         return (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">What is your current credit score?</h2>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your current credit score?
+            </motion.h2>
             <div className="space-y-3">
-              {creditScoreOptions.map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              {creditScoreOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.creditScore === option.value 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
                   <input
                     type="radio"
                     name="creditScore"
                     value={option.value}
                     checked={answers.creditScore === option.value}
                     onChange={(e) => handleAnswer('creditScore', e.target.value)}
-                    className="mr-3"
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
                   />
                   <span className="text-gray-900">{option.label}</span>
-                </label>
+                </motion.label>
               ))}
             </div>
           </div>
@@ -124,20 +161,43 @@ function Survey() {
       case 2:
         return (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">What is your annual income?</h2>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your annual income?
+            </motion.h2>
             <div className="space-y-3">
-              {incomeOptions.map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              {incomeOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.08,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.annualIncome === option.value 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
                   <input
                     type="radio"
                     name="annualIncome"
                     value={option.value}
                     checked={answers.annualIncome === option.value}
                     onChange={(e) => handleAnswer('annualIncome', e.target.value)}
-                    className="mr-3"
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
                   />
                   <span className="text-gray-900">{option.label}</span>
-                </label>
+                </motion.label>
               ))}
             </div>
           </div>
@@ -146,20 +206,43 @@ function Survey() {
       case 3:
         return (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">What is your employment status?</h2>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              What is your employment status?
+            </motion.h2>
             <div className="space-y-3">
-              {employmentOptions.map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              {employmentOptions.map((option, index) => (
+                <motion.label 
+                  key={option.value}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                  className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                    answers.employmentStatus === option.value 
+                      ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                      : 'border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
                   <input
                     type="radio"
                     name="employmentStatus"
                     value={option.value}
                     checked={answers.employmentStatus === option.value}
                     onChange={(e) => handleAnswer('employmentStatus', e.target.value)}
-                    className="mr-3"
+                    className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                      before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                      checked:before:bg-[#D2A0F0]"
                   />
                   <span className="text-gray-900">{option.label}</span>
-                </label>
+                </motion.label>
               ))}
             </div>
           </div>
@@ -168,58 +251,147 @@ function Survey() {
       case 4:
         return (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Do you currently have any credit cards?</h2>
+            <motion.h2 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-2xl font-bold text-gray-900 mb-6 font-manrope"
+            >
+              Do you currently have any credit cards?
+            </motion.h2>
             <div className="space-y-3">
-              <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              <motion.label
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0,
+                  ease: "easeOut"
+                }}
+                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                  answers.hasCreditCards === 'yes' 
+                    ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                    : 'border-2 border-gray-200 hover:border-gray-300'
+                }`}
+              >
                 <input
                   type="radio"
                   name="hasCreditCards"
                   value="yes"
                   checked={answers.hasCreditCards === 'yes'}
                   onChange={(e) => handleAnswer('hasCreditCards', e.target.value)}
-                  className="mr-3"
+                  className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                    before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                    checked:before:bg-[#D2A0F0]"
                 />
                 <span className="text-gray-900">Yes</span>
-              </label>
-              <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              </motion.label>
+              <motion.label
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: 0.1,
+                  ease: "easeOut"
+                }}
+                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                  answers.hasCreditCards === 'no' 
+                    ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                    : 'border-2 border-gray-200 hover:border-gray-300'
+                }`}
+              >
                 <input
                   type="radio"
                   name="hasCreditCards"
                   value="no"
                   checked={answers.hasCreditCards === 'no'}
                   onChange={(e) => handleAnswer('hasCreditCards', e.target.value)}
-                  className="mr-3"
+                  className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                    before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                    checked:before:bg-[#D2A0F0]"
                 />
                 <span className="text-gray-900">No</span>
-              </label>
+              </motion.label>
             </div>
             
             {answers.hasCreditCards === 'yes' && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Which credit cards do you have?</h3>
+              <motion.div 
+                ref={creditCardsRef}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="mt-6"
+              >
+                <motion.h3 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                  className="text-lg font-semibold text-gray-900 mb-1 font-manrope"
+                >
+                  Which credit cards do you have?
+                </motion.h3>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+                  className="text-sm text-gray-500 mb-4"
+                >
+                  Select one or more options
+                </motion.p>
                 <div className="space-y-2">
-                  {creditCardOptions.map((card) => (
-                    <label key={card} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  {creditCardOptions.map((card, index) => (
+                    <motion.label 
+                      key={card}
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ 
+                        duration: 0.4, 
+                        delay: 0.2 + index * 0.05,
+                        ease: "easeOut"
+                      }}
+                      className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                        answers.creditCards.includes(card) 
+                          ? 'bg-purple-50 border-2 border-[#D2A0F0]' 
+                          : 'border-2 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
                       <input
                         type="checkbox"
                         value={card}
                         checked={answers.creditCards.includes(card)}
                         onChange={(e) => {
                           const value = e.target.value;
-                          setAnswers(prev => ({
-                            ...prev,
-                            creditCards: e.target.checked
-                              ? [...prev.creditCards, value]
-                              : prev.creditCards.filter(c => c !== value)
-                          }));
+                          const isNoneOfAbove = value === 'None of the above';
+                          
+                          setAnswers(prev => {
+                            if (e.target.checked) {
+                              // If checking "None of the above", clear all others
+                              if (isNoneOfAbove) {
+                                return { ...prev, creditCards: [value] };
+                              }
+                              // If checking any other card, remove "None of the above" and add this card
+                              return {
+                                ...prev,
+                                creditCards: [...prev.creditCards.filter(c => c !== 'None of the above'), value]
+                              };
+                            } else {
+                              // Unchecking - just remove this card
+                              return {
+                                ...prev,
+                                creditCards: prev.creditCards.filter(c => c !== value)
+                              };
+                            }
+                          });
                         }}
-                        className="mr-3"
+                        className="appearance-none mr-3 w-5 h-5 rounded-full border-[2.5px] border-[#D2A0F0] relative cursor-pointer transition-all duration-200
+                          before:content-[''] before:absolute before:inset-[2.5px] before:rounded-full before:transition-all before:duration-200
+                          checked:before:bg-[#D2A0F0]"
                       />
                       <span className="text-gray-900">{card}</span>
-                    </label>
+                    </motion.label>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         );
@@ -230,9 +402,9 @@ function Survey() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl w-full mx-auto">
+        <div className="bg-white p-8 rounded-2xl border border-gray-100">
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
@@ -241,8 +413,8 @@ function Survey() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / 4) * 100}%` }}
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(currentStep / 4) * 100}%`, backgroundColor: '#D2A0F0' }}
               ></div>
             </div>
           </div>
@@ -266,7 +438,7 @@ function Survey() {
               <button
                 onClick={handleNext}
                 disabled={!isStepComplete(currentStep)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>
@@ -274,7 +446,7 @@ function Survey() {
               <button
                 onClick={handleSubmit}
                 disabled={!isStepComplete(currentStep) || loading}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Submitting...' : 'Complete Survey'}
               </button>

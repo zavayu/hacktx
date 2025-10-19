@@ -13,7 +13,7 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <div className="h-screen bg-white overflow-hidden">
+      <div className="min-h-screen bg-white">
         <Navbar />
 
         <Routes>
