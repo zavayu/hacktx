@@ -85,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white p-8 rounded-2xl shadow-lg max-w-md text-center"
+          className="bg-white p-8 rounded-2xl max-w-md text-center"
         >
           <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 lg:items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 lg:items-stretch">
           {/* Left Column: Credit Score + Radar Chart */}
           <div className="flex flex-col gap-6 h-full">
             {/* Credit Score Card */}
@@ -119,7 +119,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white p-6 rounded-2xl shadow-lg border-0 relative"
+              className="bg-white p-6 rounded-2xl border-0 relative"
             >
               <div className="flex items-center justify-between relative">
                 <div className="z-10">
