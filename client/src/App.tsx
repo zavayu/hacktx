@@ -5,13 +5,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Survey from './pages/Survey';
+import { ArrowRightIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { motion } from 'framer-motion';
 
 function AppContent() {
   const { currentUser } = useAuth();
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+      <div className="h-screen bg-white overflow-hidden">
         <Navbar />
 
         <Routes>
@@ -27,16 +29,298 @@ function AppContent() {
             </ProtectedRoute>
           } />
           <Route path="/" element={
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="bg-white flex items-center justify-center overflow-hidden relative" style={{ height: 'calc(100vh - 4rem)' }}>
+              {/* SVG Decorations - Top Left */}
+              <div className="absolute overflow-hidden rounded-lg z-10" style={{ left: '3%', top: '10%', width: '12rem', height: '8rem' }}>
+                <motion.img 
+                  src="/creditcardback.svg" 
+                  alt="" 
+                  className="w-full h-full z-10" 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.1, type: "spring", stiffness: 100 }}
+                />
+                <motion.div
+                  className="absolute inset-0 z-20 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.4) 50%, transparent 80%)',
+                    transform: 'translateX(-100%) rotate(-10deg)',
+                  }}
+                  animate={{
+                    x: ['0%', '200%']
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+              <motion.img 
+                src="/bluestar.svg" 
+                alt="" 
+                className="absolute w-12 h-12 z-10" 
+                style={{ left: '25%', top: '22%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: [1, 1.15, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.2 },
+                  scale: { duration: 3, delay: 0.7, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 20, delay: 0.7, repeat: Infinity, ease: "linear" }
+                }}
+              />
+              
+              {/* SVG Decorations - Clouds (Behind Everything) */}
+              <motion.img 
+                src="/cloudsleft.svg" 
+                alt="" 
+                className="absolute z-0" 
+                style={{ left: '0%', top: '5%', width: '30%', height: 'auto' }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+              <motion.img 
+                src="/cloudsright.svg" 
+                alt="" 
+                className="absolute z-0" 
+                style={{ right: '0%', top: '5%', width: '30%', height: 'auto' }}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+              
+              {/* SVG Decorations - Left Side */}
+              <motion.img 
+                src="/purplemonster.svg" 
+                alt="" 
+                className="absolute w-64 h-64 z-10 cursor-pointer" 
+                style={{ left: '6%', top: '32%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  rotate: [-3, 3, -3]
+                }}
+                whileHover={{ 
+                  y: -10, 
+                  rotate: 8,
+                  transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.3 },
+                  scale: { duration: 0.5, delay: 0.3, type: "spring", stiffness: 100 },
+                  rotate: { duration: 4, delay: 0.8, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                }}
+              />
+              <motion.img 
+                src="/purplestar.svg" 
+                alt="" 
+                className="absolute w-10 h-10 z-10" 
+                style={{ left: '24%', top: '48%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.4 },
+                  scale: { duration: 2.5, delay: 0.9, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 18, delay: 0.9, repeat: Infinity, ease: "linear" }
+                }}
+              />
+              <motion.img 
+                src="/greenmonster.svg" 
+                alt="" 
+                className="absolute w-48 h-48 z-10 cursor-pointer" 
+                style={{ left: '12%', bottom: '5%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ 
+                  y: -12, 
+                  rotate: -6,
+                  transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.5 },
+                  scale: { duration: 0.5, delay: 0.5, type: "spring", stiffness: 100 },
+                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 },
+                  rotate: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                }}
+              />
+              <motion.img 
+                src="/fireball.svg" 
+                alt="" 
+                className="absolute w-24 h-24 z-10" 
+                style={{ left: '5%', bottom: '20%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.6, type: "spring", stiffness: 100 }}
+              />
+              
+              {/* SVG Decorations - Top Right */}
+              <motion.img 
+                src="/jupiter.svg" 
+                alt="" 
+                className="absolute w-24 h-24 z-10" 
+                style={{ right: '15%', top: '8%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.15, type: "spring", stiffness: 100 }}
+              />
+              <motion.img 
+                src="/redstar.svg" 
+                alt="" 
+                className="absolute w-14 h-14 z-10" 
+                style={{ right: '7%', top: '8%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: [1, 1.18, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.25 },
+                  scale: { duration: 3.5, delay: 0.75, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 22, delay: 0.75, repeat: Infinity, ease: "linear" }
+                }}
+              />
+              <motion.img 
+                src="/greenstar.svg" 
+                alt="" 
+                className="absolute w-12 h-12 z-10" 
+                style={{ right: '5%', top: '22%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: [1, 1.22, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.35 },
+                  scale: { duration: 2.8, delay: 1, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 16, delay: 1, repeat: Infinity, ease: "linear" }
+                }}
+              />
+              
+              {/* SVG Decorations - Right Side */}
+              <motion.img 
+                src="/bluemonster.svg" 
+                alt="" 
+                className="absolute w-40 h-40 z-10 cursor-pointer" 
+                style={{ right: '12%', top: '28%' }}
+                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  rotate: [-4, 4, -4]
+                }}
+                whileHover={{ 
+                  y: -10, 
+                  rotate: -7,
+                  transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.45 },
+                  scale: { duration: 0.5, delay: 0.45, type: "spring", stiffness: 100 },
+                  rotate: { duration: 5, delay: 1, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                }}
+              />
+              <motion.img 
+                src="/earth.svg" 
+                alt="" 
+                className="absolute w-28 h-28 z-10" 
+                style={{ right: '3%', top: '42%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.55, type: "spring", stiffness: 100 }}
+              />
+              <div className="absolute overflow-hidden rounded-lg z-10" style={{ right: '7%', bottom: '22%', width: '12rem', height: '8rem' }}>
+                <motion.img 
+                  src="/creditcardfront.svg" 
+                  alt="" 
+                  className="w-full h-full z-10" 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.65, type: "spring", stiffness: 100 }}
+                />
+                <motion.div
+                  className="absolute inset-0 z-20 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.4) 50%, transparent 80%)',
+                    transform: 'translateX(-100%) rotate(-10deg)',
+                  }}
+                  animate={{
+                    x: ['0%', '200%']
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 2.5,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+              <motion.img 
+                src="/saturn.svg" 
+                alt="" 
+                className="absolute w-32 h-32 z-10" 
+                style={{ right: '18%', bottom: '8%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.75, type: "spring", stiffness: 100 }}
+              />
+              <motion.img 
+                src="/redmonster.svg" 
+                alt="" 
+                className="absolute w-40 h-40 z-10 cursor-pointer" 
+                style={{ right: '3%', bottom: '3%' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ 
+                  y: -10, 
+                  rotate: 5,
+                  transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: 0.85 },
+                  scale: { duration: 0.5, delay: 0.85, type: "spring", stiffness: 100 },
+                  y: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 },
+                  rotate: { duration: 2.5, type: "spring", stiffness: 40, damping: 30 }
+                }}
+              />
+              
               {/* Hero Section */}
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                 <div className="text-center">
-                  <h1 className="text-5xl font-bold text-gray-900 mb-6 font-manrope">
-                    Take Control of Your Credit Journey
-                  </h1>
-                  <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                    CreditMob creates personalized roadmaps to help you improve your credit score and choose the perfect credit cards for your financial goals.
-                  </p>
+                  <motion.h1 
+                    className="text-6xl font-extrabold text-gray-900 mb-6 font-manrope leading-[120.9%] tracking-[-0.03em]"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  >
+                    Your Credit<br />
+                    Card Journey<br />
+                    Simplified.
+                  </motion.h1>
+                  <motion.p 
+                    className="text-sm mb-8 max-w-3xl mx-auto" 
+                    style={{ color: '#4C4C4C' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                  >
+                    Personalized Roadmaps for Credit Improvement<br />
+                    and Perfect Credit Card Choices
+                  </motion.p>
                   
                   {currentUser ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto">
@@ -55,132 +339,27 @@ function AppContent() {
                       </a>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <motion.div 
+                      className="flex gap-4 justify-center"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+                    >
                       <a 
                         href="/login" 
-                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors mr-4"
+                        className="inline-flex items-center gap-2 bg-black hover:bg-gray-900 text-white font-semibold py-3 px-8 rounded-full transition-colors"
                       >
-                        Get Started Free
+                        Get Started
+                        <ArrowRightIcon className="w-4 h-4" strokeWidth={2} />
                       </a>
-                      <a 
-                        href="#features" 
-                        className="inline-block bg-white hover:bg-gray-50 text-blue-600 font-semibold py-3 px-8 rounded-lg border border-blue-600 transition-colors"
+                      <button 
+                        className="inline-flex items-center gap-2 text-black font-semibold py-3 px-8 rounded-full transition-colors hover:opacity-80"
+                        style={{ backgroundColor: '#F2EBDE' }}
                       >
-                        Learn More
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Features Section */}
-              <div id="features" className="bg-white py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                      Your Personal Credit Roadmap
-                    </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                      We analyze your financial situation and create a step-by-step plan to optimize your credit health.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="text-center">
-                      <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Credit Score Analysis</h3>
-                      <p className="text-gray-600">
-                        Get detailed insights into your credit score factors and understand exactly what's affecting your rating.
-                      </p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Personalized Roadmap</h3>
-                      <p className="text-gray-600">
-                        Receive a customized step-by-step plan tailored to your specific financial situation and goals.
-                      </p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Smart Card Recommendations</h3>
-                      <p className="text-gray-600">
-                        Get matched with credit cards that align with your spending habits and credit improvement goals.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Benefits Section */}
-              <div className="bg-gray-50 py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                      Why Choose CreditMob?
-                    </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                      Join thousands of users who have improved their credit scores and found the perfect credit cards.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="text-3xl font-bold text-blue-600 mb-2">742</div>
-                      <div className="text-sm text-gray-600 mb-2">Average Credit Score</div>
-                      <div className="text-xs text-green-600">+15 points improvement</div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="text-3xl font-bold text-green-600 mb-2">23%</div>
-                      <div className="text-sm text-gray-600 mb-2">Average Utilization</div>
-                      <div className="text-xs text-green-600">-5% reduction</div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="text-3xl font-bold text-purple-600 mb-2">$12K</div>
-                      <div className="text-sm text-gray-600 mb-2">Average Credit Limit</div>
-                      <div className="text-xs text-green-600">+$2K increase</div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="text-3xl font-bold text-orange-600 mb-2">100%</div>
-                      <div className="text-sm text-gray-600 mb-2">Payment History</div>
-                      <div className="text-xs text-green-600">Perfect record</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA Section */}
-              <div className="bg-blue-600 py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                  <h2 className="text-3xl font-bold text-white mb-4">
-                    Ready to Transform Your Credit?
-                  </h2>
-                  <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-                    Join CreditMob today and start your journey to better credit health with personalized guidance and smart recommendations.
-                  </p>
-                  {!currentUser && (
-                    <a 
-                      href="/login" 
-                      className="inline-block bg-white hover:bg-gray-100 text-blue-600 font-semibold py-3 px-8 rounded-lg transition-colors"
-                    >
-                      Start Your Free Journey
-                    </a>
+                        Watch Demo
+                        <PlayIcon className="w-4 h-4" />
+                      </button>
+                    </motion.div>
                   )}
                 </div>
               </div>

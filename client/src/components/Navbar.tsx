@@ -5,7 +5,7 @@ function Navbar() {
   const { currentUser, logout } = useAuth();
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
@@ -59,7 +59,7 @@ function Navbar() {
               ) : (
                 <Link
                   to="/login"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="bg-black hover:bg-gray-900 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
