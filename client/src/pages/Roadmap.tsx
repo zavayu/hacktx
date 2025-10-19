@@ -59,7 +59,7 @@ const Roadmap = () => {
                 const cardFromState = location.state?.selectedCard as CreditCard | undefined;
                 const cardFromStorage = localStorage.getItem('selectedCardForRoadmap');
                 const card = cardFromState || (cardFromStorage ? JSON.parse(cardFromStorage) : null);
-                
+
                 if (card) {
                     setSelectedCard(card);
                     // Store in localStorage if it came from state
@@ -73,11 +73,11 @@ const Roadmap = () => {
                 if (cachedData) {
                     try {
                         const { userId, roadmap: cachedRoadmap, timestamp } = JSON.parse(cachedData);
-                        
+
                         // Check if cache is for current user and is less than 7 days old
                         const cacheAge = Date.now() - timestamp;
                         const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-                        
+
                         if (userId === currentUser.uid && cacheAge < maxAge && cachedRoadmap.length > 0) {
                             console.log('Using cached roadmap');
                             // Still fetch user data for display purposes
@@ -151,7 +151,7 @@ const Roadmap = () => {
     // Get monster based on credit score (same logic as Dashboard)
     const getMonsterImage = () => {
         if (!userData?.creditScore) return '/purplemonster.svg';
-        
+
         if (userData.creditScore.includes('800') || userData.creditScore.includes('Excellent')) {
             return '/greenmonster.svg';
         } else if (userData.creditScore.includes('740') || userData.creditScore.includes('Good')) {
@@ -166,18 +166,18 @@ const Roadmap = () => {
     // Generate personalized dialogue using Gemini AI
     const generateMonsterDialogue = async (milestone: Milestone) => {
         if (!userData) return;
-        
+
         setLoadingDialogue(true);
         // Clear previous dialogue to ensure fresh generation
         setMonsterDialogue("");
-        
+
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-            
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
             // Add timestamp and random element to ensure fresh response each time
             const timestamp = Date.now();
             const randomSeed = Math.random().toString(36).substring(7);
-            
+
             const prompt = `You are a friendly credit advisor monster helping a user with their credit journey. 
 
 User Profile:
@@ -196,7 +196,7 @@ Tags: ${milestone.tags.join(', ')}
 
 Requirements: ${milestone.requirements.join(', ')}
 
-Generate a unique, friendly, encouraging paragraph (2-3 sentences) that:
+Generate a unique, friendly, encouraging paragraph (50 words MAX) that:
 1. Explains why this milestone is important for their specific situation
 2. Provides personalized tips on how to achieve it based on their profile
 3. Uses a warm, supportive tone like a helpful friend
@@ -210,7 +210,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
             const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
-            
+
             setMonsterDialogue(text);
         } catch (error) {
             console.error('Error generating monster dialogue:', error);
@@ -226,7 +226,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
         setCompletedMilestones(prev => {
             const newSet = new Set(prev);
             const wasCompleted = newSet.has(milestoneId);
-            
+
             if (wasCompleted) {
                 newSet.delete(milestoneId);
             } else {
@@ -235,7 +235,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                 setCelebratingMilestone(milestoneId);
                 setTimeout(() => setCelebratingMilestone(null), 2000);
             }
-            
+
             // Save to local storage
             if (currentUser) {
                 try {
@@ -247,7 +247,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                     console.error('Error saving completed milestones to cache:', error);
                 }
             }
-            
+
             return newSet;
         });
     };
@@ -546,7 +546,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                             <h3 className="text-sm font-bold text-gray-900 text-center mb-2">
                                                 Apply for {selectedCard.name}
                                             </h3>
-                                            
+
                                             {/* Card Image Preview */}
                                             {selectedCard.image_url && (
                                                 <div className="mb-3 bg-white rounded-lg p-2 shadow-sm">
@@ -557,7 +557,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                                     />
                                                 </div>
                                             )}
-                                            
+
                                             <div className="flex items-center justify-center gap-2">
                                                 <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full border border-yellow-200">
                                                     <TrophyIcon className="w-3 h-3 text-yellow-600" />
@@ -623,7 +623,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50 }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="fixed left-6 bottom-6 z-50"
+                        className="fixed left-6 bottom-32 z-50"
                     >
                         {/* Monster */}
                         <motion.div
@@ -638,14 +638,14 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                 alt="Credit advisor monster"
                                 className="w-40 h-40 object-contain drop-shadow-lg"
                             />
-                            
+
                             {/* Floating animation */}
                             <motion.div
-                                animate={{ 
+                                animate={{
                                     y: [0, -8, 0],
                                     rotate: [0, 2, -2, 0]
                                 }}
-                                transition={{ 
+                                transition={{
                                     duration: 3,
                                     repeat: Infinity,
                                     ease: "easeInOut"
@@ -666,12 +666,12 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0, opacity: 0 }}
                             transition={{ delay: 0.2, duration: 0.3 }}
-                            className="absolute -top-4 left-32 bg-white rounded-2xl p-6 shadow-xl border-2 border-purple-200 max-w-md"
+                            className="absolute -top-32 left-44 bg-white rounded-2xl p-6 shadow-xl border-2 border-purple-200 max-w-md"
                         >
-                            {/* Speech bubble tail pointing to monster */}
-                            <div className="absolute -left-2 top-8 w-0 h-0 border-r-[12px] border-r-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent"></div>
-                            <div className="absolute -left-3 top-8 w-0 h-0 border-r-[14px] border-r-purple-200 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent"></div>
-                            
+                            {/* Speech bubble tail pointing left to monster from bottom left side */}
+                            <div className="absolute -left-2 bottom-8 w-0 h-0 border-r-[12px] border-r-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent"></div>
+                            <div className="absolute -left-3 bottom-8 w-0 h-0 border-r-[14px] border-r-purple-200 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent"></div>
+
                             {loadingDialogue ? (
                                 <div className="flex items-center gap-3">
                                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
@@ -716,9 +716,9 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                             <div className="sticky top-0 bg-[#D2A0F0] text-white p-6 z-10">
                                 <button
                                     onClick={() => {
-                                setSelectedMilestone(null);
-                                setMonsterDialogue("");
-                            }}
+                                        setSelectedMilestone(null);
+                                        setMonsterDialogue("");
+                                    }}
                                     className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
                                 >
                                     <XMarkIcon className="w-6 h-6" />
@@ -735,10 +735,10 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                         <div className="flex gap-2">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedMilestone.difficulty === "easy"
-                                                        ? "bg-green-100 text-green-700"
-                                                        : selectedMilestone.difficulty === "medium"
-                                                            ? "bg-orange-100 text-orange-700"
-                                                            : "bg-red-100 text-red-700"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : selectedMilestone.difficulty === "medium"
+                                                        ? "bg-orange-100 text-orange-700"
+                                                        : "bg-red-100 text-red-700"
                                                     }`}
                                             >
                                                 {selectedMilestone.difficulty.toUpperCase()}
@@ -769,7 +769,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                         <h3 className="text-lg font-bold text-gray-900 mb-4">
                                             Your Selected Card
                                         </h3>
-                                        
+
                                         {/* Card Preview */}
                                         {selectedCard.image_url && (
                                             <div className="mb-4 bg-white rounded-lg p-3 shadow-sm">
@@ -780,21 +780,21 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                                 />
                                             </div>
                                         )}
-                                        
+
                                         {/* Card Info */}
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center pb-2 border-b border-purple-200">
                                                 <span className="text-sm text-gray-600">Card Name</span>
                                                 <span className="text-sm font-bold text-gray-900">{selectedCard.name}</span>
                                             </div>
-                                            
+
                                             {selectedCard.rewardsType && (
                                                 <div className="flex justify-between items-center pb-2 border-b border-purple-200">
                                                     <span className="text-sm text-gray-600">Rewards Type</span>
                                                     <span className="text-sm font-bold text-gray-900 capitalize">{selectedCard.rewardsType}</span>
                                                 </div>
                                             )}
-                                            
+
                                             {(selectedCard.annualFee !== undefined || selectedCard.annual_fee) && (
                                                 <div className="flex justify-between items-center pb-2 border-b border-purple-200">
                                                     <span className="text-sm text-gray-600">Annual Fee</span>
@@ -803,7 +803,7 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                                     </span>
                                                 </div>
                                             )}
-                                            
+
                                             {selectedCard.eligibility_requirements?.credit_score && (
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-sm text-gray-600">Min. Credit Score</span>
@@ -895,8 +895,8 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                                     setTimeout(() => setSelectedMilestone(null), 1500);
                                                 }}
                                                 className={`w-full py-4 rounded-xl font-bold text-white transition-all ${completedMilestones.has(selectedMilestone.id)
-                                                        ? "bg-[#7FC656] hover:opacity-90"
-                                                        : "bg-gray-600 hover:opacity-90"
+                                                    ? "bg-[#7FC656] hover:opacity-90"
+                                                    : "bg-gray-600 hover:opacity-90"
                                                     }`}
                                             >
                                                 {completedMilestones.has(selectedMilestone.id)
@@ -912,8 +912,8 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
                                                 setTimeout(() => setSelectedMilestone(null), 1500);
                                             }}
                                             className={`w-full py-4 rounded-xl font-bold text-white transition-all ${completedMilestones.has(selectedMilestone.id)
-                                                    ? "bg-[#7FC656] hover:opacity-90"
-                                                    : "bg-[#D2A0F0] hover:opacity-90 shadow-lg hover:shadow-xl"
+                                                ? "bg-[#7FC656] hover:opacity-90"
+                                                : "bg-[#D2A0F0] hover:opacity-90 shadow-lg hover:shadow-xl"
                                                 }`}
                                         >
                                             {completedMilestones.has(selectedMilestone.id)
@@ -929,328 +929,328 @@ Timestamp: ${timestamp} | Seed: ${randomSeed}`;
             </AnimatePresence>
 
             {/* Side decor with animations */}
-            <motion.img 
-                src="/earth.svg" 
-                alt="Earth" 
-                aria-hidden 
-                className="absolute left-10 bottom-16 w-36 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/earth.svg"
+                alt="Earth"
+                aria-hidden
+                className="absolute left-10 bottom-16 w-36 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, 360],
                     y: [0, -5, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 20, repeat: Infinity, ease: "linear" },
                     y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/jupiter.svg" 
-                alt="Jupiter" 
-                aria-hidden 
-                className="absolute right-4 top-28 w-40 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/jupiter.svg"
+                alt="Jupiter"
+                aria-hidden
+                className="absolute right-4 top-28 w-40 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, -360],
                     y: [0, 3, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 25, repeat: Infinity, ease: "linear" },
                     y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/bluestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-20 top-20 w-6 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/bluestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-20 top-20 w-6 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [12, 372],
                     scale: [1, 1.1, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 8, repeat: Infinity, ease: "linear" },
                     scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/purplestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-24 bottom-24 w-8 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/purplestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-24 bottom-24 w-8 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-6, 354],
                     scale: [1, 1.15, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 6, repeat: Infinity, ease: "linear" },
                     scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/bluestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-40 top-1/3 w-5 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/bluestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-40 top-1/3 w-5 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, 360],
                     y: [0, -3, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 10, repeat: Infinity, ease: "linear" },
                     y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/purplestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-32 bottom-1/3 w-5 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/purplestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-32 bottom-1/3 w-5 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, -360],
                     y: [0, 4, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 12, repeat: Infinity, ease: "linear" },
                     y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/saturn.svg" 
-                alt="Saturn" 
-                aria-hidden 
-                className="absolute left-4 top-36 w-32 opacity-40 pointer-events-none select-none hidden lg:block" 
-                animate={{ 
+            <motion.img
+                src="/saturn.svg"
+                alt="Saturn"
+                aria-hidden
+                className="absolute left-4 top-36 w-32 opacity-40 pointer-events-none select-none hidden lg:block"
+                animate={{
                     rotate: [0, 360],
                     x: [0, 2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 30, repeat: Infinity, ease: "linear" },
                     x: { duration: 6, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/cloudsleft.svg" 
-                alt="Clouds" 
-                aria-hidden 
-                className="absolute left-6 top-4 w-40 opacity-30 pointer-events-none select-none hidden lg:block" 
-                animate={{ 
+            <motion.img
+                src="/cloudsleft.svg"
+                alt="Clouds"
+                aria-hidden
+                className="absolute left-6 top-4 w-40 opacity-30 pointer-events-none select-none hidden lg:block"
+                animate={{
                     x: [0, 5, 0],
                     opacity: [0.3, 0.4, 0.3]
                 }}
-                transition={{ 
+                transition={{
                     x: { duration: 8, repeat: Infinity, ease: "easeInOut" },
                     opacity: { duration: 6, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/cloudsright.svg" 
-                alt="Clouds" 
-                aria-hidden 
-                className="absolute right-6 top-12 w-40 opacity-30 pointer-events-none select-none hidden lg:block" 
-                animate={{ 
+            <motion.img
+                src="/cloudsright.svg"
+                alt="Clouds"
+                aria-hidden
+                className="absolute right-6 top-12 w-40 opacity-30 pointer-events-none select-none hidden lg:block"
+                animate={{
                     x: [0, -5, 0],
                     opacity: [0.3, 0.4, 0.3]
                 }}
-                transition={{ 
+                transition={{
                     x: { duration: 7, repeat: Infinity, ease: "easeInOut" },
                     opacity: { duration: 5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/fireball.svg" 
-                alt="Fireball" 
-                aria-hidden 
-                className="absolute left-1/4 -translate-x-1/3 -top-[-10] w-16 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/fireball.svg"
+                alt="Fireball"
+                aria-hidden
+                className="absolute left-1/4 -translate-x-1/3 -top-[-10] w-16 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [12, 372],
                     scale: [1, 1.2, 1],
                     y: [0, -2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 4, repeat: Infinity, ease: "linear" },
                     scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
                     y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/redstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-16 top-1/2 w-4 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/redstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-16 top-1/2 w-4 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, 360],
                     scale: [1, 1.1, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 15, repeat: Infinity, ease: "linear" },
                     scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/greenstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-16 top-2/3 w-5 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/greenstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-16 top-2/3 w-5 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [0, -360],
                     y: [0, 3, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 18, repeat: Infinity, ease: "linear" },
                     y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            
+
             {/* Additional scattered stars with animations */}
-            <motion.img 
-                src="/bluestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-12 top-1/4 w-3 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/bluestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-12 top-1/4 w-3 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [45, 405],
                     scale: [1, 1.2, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 9, repeat: Infinity, ease: "linear" },
                     scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/purplestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-20 top-1/4 w-4 opacity-45 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/purplestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-20 top-1/4 w-4 opacity-45 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-30, 330],
                     y: [0, -2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 11, repeat: Infinity, ease: "linear" },
                     y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/redstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-28 top-3/4 w-3 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/redstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-28 top-3/4 w-3 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [60, 420],
                     scale: [1, 1.15, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 7, repeat: Infinity, ease: "linear" },
                     scale: { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/greenstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-28 top-1/5 w-4 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/greenstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-28 top-1/5 w-4 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-45, 315],
                     y: [0, 2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 13, repeat: Infinity, ease: "linear" },
                     y: { duration: 4.2, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/bluestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-36 top-1/6 w-3 opacity-45 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/bluestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-36 top-1/6 w-3 opacity-45 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [15, 375],
                     scale: [1, 1.1, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 14, repeat: Infinity, ease: "linear" },
                     scale: { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/purplestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-36 top-4/5 w-4 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/purplestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-36 top-4/5 w-4 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-15, 345],
                     y: [0, -3, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 16, repeat: Infinity, ease: "linear" },
                     y: { duration: 3.8, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/redstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-8 top-1/8 w-3 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/redstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-8 top-1/8 w-3 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [75, 435],
                     scale: [1, 1.2, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 8.5, repeat: Infinity, ease: "linear" },
                     scale: { duration: 2.7, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/greenstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-8 top-7/8 w-4 opacity-45 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/greenstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-8 top-7/8 w-4 opacity-45 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-60, 300],
                     y: [0, 2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 12.5, repeat: Infinity, ease: "linear" },
                     y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/bluestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute left-44 top-2/5 w-3 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/bluestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute left-44 top-2/5 w-3 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [30, 390],
                     scale: [1, 1.1, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 17, repeat: Infinity, ease: "linear" },
                     scale: { duration: 3.3, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/purplestar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-44 top-3/5 w-4 opacity-40 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/purplestar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-44 top-3/5 w-4 opacity-40 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-30, 330],
                     y: [0, -2, 0]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 19, repeat: Infinity, ease: "linear" },
                     y: { duration: 3.7, repeat: Infinity, ease: "easeInOut" }
                 }}
             />
-            <motion.img 
-                src="/greenstar.svg" 
-                alt="star" 
-                aria-hidden 
-                className="absolute right-20 top-11/12 w-4 opacity-50 pointer-events-none select-none hidden md:block" 
-                animate={{ 
+            <motion.img
+                src="/greenstar.svg"
+                alt="star"
+                aria-hidden
+                className="absolute right-20 top-11/12 w-4 opacity-50 pointer-events-none select-none hidden md:block"
+                animate={{
                     rotate: [-90, 270],
                     scale: [1, 1.15, 1]
                 }}
-                transition={{ 
+                transition={{
                     rotate: { duration: 20, repeat: Infinity, ease: "linear" },
                     scale: { duration: 2.9, repeat: Infinity, ease: "easeInOut" }
                 }}

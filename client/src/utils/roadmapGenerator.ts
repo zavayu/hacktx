@@ -44,7 +44,7 @@ export async function generatePersonalizedRoadmap(
   allMilestones: Milestone[]
 ): Promise<Milestone[]> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = `You are a credit roadmap advisor. Given a user's financial data and the available milestones,
 select the 5 most relevant milestones that the user should focus on next.
