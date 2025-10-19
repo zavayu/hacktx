@@ -16,6 +16,7 @@ import {
     CheckCircleIcon
 } from "@heroicons/react/24/solid";
 import type { CreditCard } from "../utils/creditCardMatcher";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const Roadmap = () => {
     const { currentUser } = useAuth();
@@ -26,6 +27,11 @@ const Roadmap = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
     const [selectedCard, setSelectedCard] = useState<CreditCard | null>(null);
+    const [monsterDialogue, setMonsterDialogue] = useState<string>("");
+    const [loadingDialogue, setLoadingDialogue] = useState(false);
+
+    // Initialize Gemini AI
+    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
     const [completedMilestones, setCompletedMilestones] = useState<Set<string>>(() => {
         // Initialize from local storage
         if (!currentUser) return new Set();
@@ -140,6 +146,78 @@ const Roadmap = () => {
         if (tags.includes("discipline")) return "🎖️";
 
         return "⭐";
+    };
+
+    // Get monster based on credit score (same logic as Dashboard)
+    const getMonsterImage = () => {
+        if (!userData?.creditScore) return '/purplemonster.svg';
+        
+        if (userData.creditScore.includes('800') || userData.creditScore.includes('Excellent')) {
+            return '/greenmonster.svg';
+        } else if (userData.creditScore.includes('740') || userData.creditScore.includes('Good')) {
+            return '/bluemonster.svg';
+        } else if (userData.creditScore.includes('670') || userData.creditScore.includes('Fair')) {
+            return '/purplemonster.svg';
+        } else {
+            return '/redmonster.svg';
+        }
+    };
+
+    // Generate personalized dialogue using Gemini AI
+    const generateMonsterDialogue = async (milestone: Milestone) => {
+        if (!userData) return;
+        
+        setLoadingDialogue(true);
+        // Clear previous dialogue to ensure fresh generation
+        setMonsterDialogue("");
+        
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            
+            // Add timestamp and random element to ensure fresh response each time
+            const timestamp = Date.now();
+            const randomSeed = Math.random().toString(36).substring(7);
+            
+            const prompt = `You are a friendly credit advisor monster helping a user with their credit journey. 
+
+User Profile:
+- Credit Score: ${userData.creditScore || 'Not provided'}
+- Annual Income: ${userData.annualIncome || 'Not provided'}
+- Employment Status: ${userData.employmentStatus || 'Not provided'}
+- Has Credit Cards: ${userData.hasCreditCards || 'Not provided'}
+- Credit Length: ${userData.creditLength || 'Not provided'}
+- Late Payments: ${userData.latePayments || 'Not provided'}
+- Credit Goal: ${userData.creditGoal || 'Not provided'}
+
+Current Milestone: "${milestone.title}"
+Description: "${milestone.description}"
+Difficulty: ${milestone.difficulty}
+Tags: ${milestone.tags.join(', ')}
+
+Requirements: ${milestone.requirements.join(', ')}
+
+Generate a unique, friendly, encouraging paragraph (2-3 sentences) that:
+1. Explains why this milestone is important for their specific situation
+2. Provides personalized tips on how to achieve it based on their profile
+3. Uses a warm, supportive tone like a helpful friend
+4. Keep it concise and actionable
+5. Make it feel fresh and personalized each time
+
+Don't mention you're an AI or monster - speak as if you're their personal credit advisor. Vary your approach and wording to keep it engaging.
+
+Timestamp: ${timestamp} | Seed: ${randomSeed}`;
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            
+            setMonsterDialogue(text);
+        } catch (error) {
+            console.error('Error generating monster dialogue:', error);
+            setMonsterDialogue("This milestone is important for your credit journey! Take it step by step and you'll reach your goals. 💪");
+        } finally {
+            setLoadingDialogue(false);
+        }
     };
 
     // (removed legacy color helper in favor of fixed palette)
@@ -327,7 +405,10 @@ const Roadmap = () => {
                                     <motion.div
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setSelectedMilestone(milestone)}
+                                        onClick={() => {
+                                            setSelectedMilestone(milestone);
+                                            generateMonsterDialogue(milestone);
+                                        }}
                                         className="relative cursor-pointer transition-all"
                                         animate={
                                             celebratingMilestone === milestone.id && !completedMilestones.has(milestone.id)
@@ -364,19 +445,15 @@ const Roadmap = () => {
                                                     </span>
                                                 )}
 
-                                                {/* Removed shine scan effect for flat look */}
-                                                
                                                 {/* Celebration effect */}
                                                 {celebratingMilestone === milestone.id && (
                                                     <>
-                                                        {/* Pulse ring */}
                                                         <motion.div
                                                             className="absolute inset-0 rounded-full border-4 border-[#7FC656]"
                                                             initial={{ scale: 1, opacity: 1 }}
                                                             animate={{ scale: 2.5, opacity: 0 }}
                                                             transition={{ duration: 0.8 }}
                                                         />
-                                                        {/* Confetti particles */}
                                                         {[...Array(8)].map((_, i) => (
                                                             <motion.div
                                                                 key={i}
@@ -433,7 +510,6 @@ const Roadmap = () => {
                         );
                     })}
 
-                    {/* Card Application Milestone - Final Goal (Centered Below Line) */}
                     {selectedCard && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -539,6 +615,78 @@ const Roadmap = () => {
                 </motion.div>
             </div>
 
+            {/* Monster with Speech Bubble */}
+            <AnimatePresence>
+                {selectedMilestone && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="fixed left-6 bottom-6 z-50"
+                    >
+                        {/* Monster */}
+                        <motion.div
+                            initial={{ scale: 0, rotate: -10 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, rotate: -10 }}
+                            transition={{ delay: 0.1, duration: 0.4, type: "spring", stiffness: 200 }}
+                            className="relative"
+                        >
+                            <img
+                                src={getMonsterImage()}
+                                alt="Credit advisor monster"
+                                className="w-40 h-40 object-contain drop-shadow-lg"
+                            />
+                            
+                            {/* Floating animation */}
+                            <motion.div
+                                animate={{ 
+                                    y: [0, -8, 0],
+                                    rotate: [0, 2, -2, 0]
+                                }}
+                                transition={{ 
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="absolute inset-0"
+                            >
+                                <img
+                                    src={getMonsterImage()}
+                                    alt="Credit advisor monster"
+                                    className="w-40 h-40 object-contain"
+                                />
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Speech Bubble - Positioned to top right of monster */}
+                        <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                            className="absolute -top-4 left-32 bg-white rounded-2xl p-6 shadow-xl border-2 border-purple-200 max-w-md"
+                        >
+                            {/* Speech bubble tail pointing to monster */}
+                            <div className="absolute -left-2 top-8 w-0 h-0 border-r-[12px] border-r-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent"></div>
+                            <div className="absolute -left-3 top-8 w-0 h-0 border-r-[14px] border-r-purple-200 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent"></div>
+                            
+                            {loadingDialogue ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                                    <span className="text-lg text-gray-600">Thinking...</span>
+                                </div>
+                            ) : (
+                                <p className="text-lg text-gray-700 leading-relaxed w-[400px]">
+                                    {monsterDialogue}
+                                </p>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Sidebar Modal */}
             <AnimatePresence>
                 {selectedMilestone && (
@@ -548,7 +696,10 @@ const Roadmap = () => {
                             initial={{ backdropFilter: "blur(0px)" }}
                             animate={{ backdropFilter: "blur(8px)" }}
                             exit={{ backdropFilter: "blur(0px)" }}
-                            onClick={() => setSelectedMilestone(null)}
+                            onClick={() => {
+                                setSelectedMilestone(null);
+                                setMonsterDialogue("");
+                            }}
                             className="fixed inset-0 z-40"
                             style={{ backdropFilter: "blur(8px)" }}
                         />
@@ -564,7 +715,10 @@ const Roadmap = () => {
                             {/* Header */}
                             <div className="sticky top-0 bg-[#D2A0F0] text-white p-6 z-10">
                                 <button
-                                    onClick={() => setSelectedMilestone(null)}
+                                    onClick={() => {
+                                setSelectedMilestone(null);
+                                setMonsterDialogue("");
+                            }}
                                     className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
                                 >
                                     <XMarkIcon className="w-6 h-6" />
